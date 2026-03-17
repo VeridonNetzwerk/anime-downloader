@@ -1,0 +1,51 @@
+# Troubleshooting
+
+## 1) AniWorld fails with curses/_curses errors
+
+Cause:
+- Incompatible Python version in `.venv` (commonly Python 3.14).
+
+Fix:
+1. Run launcher option `4`.
+2. Let it recreate `.venv` with Python 3.13.
+3. Retry option `1` or `3`.
+
+## 2) npm install fails in aniwatch-api
+
+The launcher has staged recovery:
+- normal install
+- install without lifecycle scripts
+- clean install via npm@10
+- npm cache clean + final install retry
+
+Fix:
+- Run option `4` and inspect `latest.log` for `ERROR_CODE=` entries.
+
+## 3) WSL/Ubuntu not found
+
+Fix:
+1. Run option `4`.
+2. Reboot Windows if prompted.
+3. Run option `4` again.
+
+## 4) API not available on port 4000
+
+Fix:
+- Use option `2` or `3` to restart the API.
+- Check if another process is using port 4000.
+- Check `latest.log` for build or startup errors.
+
+## 5) Browser opens but UI is blank
+
+Fix:
+- Ensure `aniwatch-ui/index.html` exists.
+- Restart with option `2` or `3`.
+- Confirm local firewall is not blocking loopback ports.
+
+## Reporting a Bug
+
+Open a GitHub Issue and include:
+- selected menu option
+- exact error text
+- `latest.log`
+- OS, Node.js, Python versions

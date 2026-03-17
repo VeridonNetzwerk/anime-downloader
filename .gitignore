@@ -1,0 +1,28 @@
+# Local runtime state
+.venv/
+.aniworld/
+latest.log
+
+# VS Code local workspace settings
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Node artifacts
+node_modules/
+aniwatch-api/node_modules/
+aniwatch-api/dist/
+
+# Environment / secrets
+.env
+.env.*
+aniwatch-api/.env
+aniwatch-api/.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
