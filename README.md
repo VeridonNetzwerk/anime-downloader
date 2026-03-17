@@ -1,94 +1,156 @@
-# AniWorld / AniWatch Launcher
+<div align="center">
 
-Unified Windows launcher to install, repair, and run:
+# 📺 AniWorld / AniWatch Downloader
 
-- AniWorld UI at `http://localhost:8080`
-- AniWatch API at `http://localhost:4000`
-- AniWatch UI at `http://localhost:4001`
+**Unified Windows launcher to install, manage, and run AniWorld & AniWatch — from a single menu.**
 
-## Overview
+<p>
+  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="License: MIT">
+  </a>
+  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/issues">
+    <img src="https://img.shields.io/github/issues/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="Open Issues">
+  </a>
+  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/stargazers">
+    <img src="https://img.shields.io/github/stars/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="Stars">
+  </a>
+  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue?style=flat-square" alt="Platform: Windows 10/11">
+  <img src="https://img.shields.io/badge/Node.js-24.x-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 24.x">
+  <img src="https://img.shields.io/badge/Python-3.13.x-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.13.x">
+</p>
 
-This project automates environment setup and startup for both stacks from a single menu-driven launcher.
+<p>
+  <a href="https://www.paypal.com/donate/?hosted_button_id=972P9WTWE7RBU">
+    <img src="https://img.shields.io/badge/Donate-PayPal-0070ba?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal">
+  </a>
+</p>
 
-Highlights:
+> ⚠️ **Disclaimer:** This tool is intended for **private use only**.
+> It is not affiliated with, sponsored by, or associated with AniWorld, AniWatch, or their operators.
+> Use may violate a platform's Terms of Service and could be illegal in your country.
+> **You are solely responsible for your use of this software.**
 
-- One-click dependency setup/repair (`Option 4`)
-- Auto-recovery for common npm and Python issues
-- WSL + Ubuntu checks and automatic provisioning
-- Structured logging and error-code entries in `latest.log`
+</div>
 
-## Runtime Requirements
+---
 
-| Component | Requirement | Notes |
-| --- | --- | --- |
-| OS | Windows 10/11 | Required for launcher and WSL flow |
-| Node.js | LTS (tested with 24.x) | Used for API/UI services |
-| Python | 3.13.x recommended | Preferred for AniWorld compatibility |
-| WSL | Ubuntu distro | Auto-installed/repaired by `Option 4` |
+## 🖥️ Features
 
-Important:
+- **One-click setup & repair** — `Option 4` installs/heals all dependencies automatically
+- **Auto-recovers npm issues** — falls back through `--ignore-scripts`, npm@10 CI mode, and cache-clean stages
+- **WSL integration** — checks for Ubuntu / installs it automatically via `wsl --install`
+- **Smart Python guards** — detects Python 3.14+ (`curses` incompatible) and recreates the venv
+- **Structured logging** — every run appends `ERROR_CODE=` entries to `latest.log`
+- **Live download queue** — `download-server.mjs` streams progress via SSE to the AniWatch UI
 
-- Python 3.14 is not recommended for AniWorld in this setup due to curses compatibility behavior on Windows.
+---
 
-## Quick Start
+## 🛠️ Requirements
 
-1. Run `start-aniwatch.bat`
-2. Select `4` once (`Install/Repair`)
-3. Start services:
+| Component | Version | Notes |
+|-----------|---------|-------|
+| OS | Windows 10 / 11 | Required for launcher and WSL |
+| Node.js | 24.x (LTS) | For AniWatch API + download server |
+| Python | **3.13.x** recommended | 3.14+ breaks `curses` on Windows |
+| WSL | Ubuntu distro | Auto-installed by `Option 4` |
 
-| Option | Action |
-| --- | --- |
-| `1` | Start AniWorld only |
-| `2` | Start AniWatch only |
-| `3` | Start both |
-| `4` | Install/repair all dependencies |
-| `5` | Exit |
+---
 
-## Download Sources
+## 🚀 Quick Start
 
-- https://anworld.to
-- https://aniwatchtv.to
+```bat
+start-aniwatch.bat
+```
 
-## Wiki
+1. On first run, select **`4` → Install / Repair** — this sets up everything automatically.
+2. Once done, pick your mode:
 
-Detailed docs are provided in the `wiki/` folder:
+| Option | Action | URL |
+|--------|--------|-----|
+| `1` | AniWorld only | http://localhost:8080 |
+| `2` | AniWatch only | http://localhost:4001 |
+| `3` | Both stacks | http://localhost:8080 + :4001 |
+| `4` | Install / Repair all | — |
+| `5` | Exit | — |
 
-- `wiki/Home.md`
-- `wiki/Installation.md`
-- `wiki/Usage-Guide.md`
-- `wiki/How-It-Works.md`
-- `wiki/Troubleshooting.md`
-- `wiki/FAQ.md`
+---
 
-After pushing this repo, you can copy these pages into the GitHub Wiki if you want a separate wiki UI.
+## 📺 Download Sources
 
-## Reporting Issues
+Content can be searched and downloaded from these sites:
 
-If something breaks, open an issue and include:
+| Site | URL |
+|------|-----|
+| AniWorld | https://anworld.to |
+| AniWatch | https://aniwatchtv.to |
 
-- launcher option used (`1`/`2`/`3`/`4`)
-- expected behavior vs actual behavior
-- relevant `latest.log` output
-- Windows, Node.js, and Python versions
+---
 
-An issue template is included at `.github/ISSUE_TEMPLATE/bug_report.md`.
+## 📖 Wiki
 
-## Legal Disclaimer
+Full documentation is available in the **[GitHub Wiki](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki)**:
 
-This project is provided as-is for educational and technical purposes.
+| Page | Description |
+|------|-------------|
+| [Home](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Home) | Overview and navigation |
+| [Installation](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Installation) | Step-by-step first-time setup |
+| [Usage Guide](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Usage-Guide) | Menu reference, ports, log files |
+| [How It Works](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/How-It-Works) | Architecture and component overview |
+| [Troubleshooting](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Troubleshooting) | Common errors and fixes |
+| [FAQ](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/FAQ) | Frequently asked questions |
 
-I am not responsible for illegal use, copyright infringement, or any other misuse of this software.
-Users are solely responsible for compliance with local laws, copyright rules, and platform terms.
+---
 
-## Built With AI
+## 🐛 Reporting Issues
 
-Parts of this project were created and refined with AI assistance.
+Found a bug? Open an [**Issue**](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/issues/new/choose) and include:
 
-## Attribution / Upstream Sources
+- Which menu option you used (`1` / `2` / `3` / `4`)
+- What you expected vs. what actually happened
+- The relevant section of `latest.log`
+- Your Windows, Node.js, and Python versions
 
-Large parts and ideas were derived from:
+An issue template is pre-filled at `.github/ISSUE_TEMPLATE/bug_report.md`.
 
-- https://github.com/johanwestling/wsl-install
-- https://github.com/nodejs/installer
-- https://github.com/ruxartic/aniwatch-dl
-- https://github.com/ghoshRitesh12/aniwatch-api
+---
+
+## 💖 Support
+
+If this project saves you time, consider buying me a coffee:
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=972P9WTWE7RBU">
+  <img src="https://img.shields.io/badge/Donate-PayPal-0070ba?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal">
+</a>
+
+---
+
+## ⚖️ Legal Disclaimer
+
+This project is provided **as-is** for educational and personal use only.
+The author is not responsible for illegal use, copyright infringement, or any misuse of this software.
+Users are solely responsible for compliance with local laws, copyright regulations, and platform terms of service.
+
+---
+
+## 🤖 Built With AI
+
+Parts of this project were created and refined with the assistance of AI tools.
+
+---
+
+## 🙏 Attribution
+
+This project builds on the work of:
+
+| Project | Author |
+|---------|--------|
+| [aniwatch-dl](https://github.com/ruxartic/aniwatch-dl) | ruxartic |
+| [aniwatch-api](https://github.com/ghoshRitesh12/aniwatch-api) | ghoshRitesh12 |
+| [wsl-install](https://github.com/johanwestling/wsl-install) | johanwestling |
+| [nodejs/installer](https://github.com/nodejs/installer) | Node.js team |
+
+---
+
+<div align="center">
+  <sub>MIT License · © 2026 VeridonNetzwerk</sub>
+</div>
