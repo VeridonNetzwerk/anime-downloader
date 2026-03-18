@@ -6,9 +6,10 @@ Cause:
 - Incompatible Python version in `.venv` (commonly Python 3.14).
 
 Fix:
-1. Run launcher option `4`.
-2. Let it recreate `.venv` with Python 3.13.
-3. Retry option `1` or `3`.
+1. Run `python start-anime-downloader.py`.
+2. Run launcher option `4`.
+3. Let it recreate `.venv` with Python 3.13.
+4. Retry option `1` or `3`.
 
 ## 2) npm install fails in aniwatch-api
 
@@ -27,6 +28,10 @@ Fix:
 1. Run option `4`.
 2. Reboot Windows if prompted.
 3. Run option `4` again.
+
+Note:
+- This only applies to Windows.
+- On Linux/macOS, option `4` uses native package managers instead of WSL.
 
 ## 4) API not available on port 4000
 

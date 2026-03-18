@@ -1,5 +1,13 @@
 # Usage Guide
 
+## Start Command
+
+Run the launcher with:
+
+```bash
+python start-anime-downloader.py
+```
+
 ## Launcher Menu
 
 - `1` AniWorld only
@@ -13,6 +21,12 @@
 1. Run `4` once after cloning/downloading the project.
 2. Use `3` for full stack startup.
 3. Use `1` or `2` if you only need one side.
+
+OS behavior for option `4`:
+
+- Windows: installs/repairs Node.js and WSL + Ubuntu
+- Linux: installs dependencies via apt/dnf/pacman
+- macOS: installs dependencies via Homebrew
 
 ## Source Selection
 
@@ -30,6 +44,7 @@
 
 - Main log file: `latest.log`
 - Installer and launcher steps are logged with timestamps and thread labels.
+- Structured installer failures include `ERROR_CODE=` markers for diagnosis.
 
 ## Queue Behavior (AniWatch)
 

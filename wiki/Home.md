@@ -4,7 +4,7 @@ Welcome to the full documentation for the Downloaders.
 
 ## What This Project Is
 
-This project is a unified Windows launcher and orchestration layer that brings together three anime downloading solutions:
+This project is a unified launcher and orchestration layer that brings together three anime downloading solutions:
 
 - **AniWorld Downloader** — A Python-based CLI tool for downloading anime with German audio/subtitles from anworld.to
 - **AniWatch API** — A TypeScript backend that provides REST endpoints for anime metadata and episode information from aniwatchtv.to

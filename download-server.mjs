@@ -19,6 +19,7 @@ const API_PORT = 4000;
 const DEBUG_ENABLED = process.env.ANIWATCH_DEBUG !== '0';
 const LOG_PATH = path.join(__dirname, 'latest.log');
 const SETTINGS_PATH = path.join(__dirname, '.aniwatch-settings.json');
+const IS_WINDOWS = process.platform === 'win32';
 
 // Default settings with Windows Downloads folder fallback
 const DEFAULT_SETTINGS = {
@@ -107,8 +108,9 @@ function getWslHostIp() {
     }
     return 'localhost'; // WSL 1 or single-NIC fallback
 }
-const WSL_HOST_IP = getWslHostIp();
-log('INFO', 'Server thread', `WSL host IP detected: ${WSL_HOST_IP}`);
+const DOWNLOAD_API_HOST = IS_WINDOWS ? getWslHostIp() : '127.0.0.1';
+log('INFO', 'Server thread', `Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'} (${process.platform})`);
+log('INFO', 'Server thread', `Download API host detected: ${DOWNLOAD_API_HOST}`);
 debug('Server thread', `DEBUG enabled: ${DEBUG_ENABLED}`);
 
 // Read the shell script once at startup.
@@ -139,11 +141,16 @@ function runJob(job) {
     job.status = 'running';
     log('INFO', 'Download thread', `Job started: ${job.id} (${job.title})`);
     debug('Download thread', `Job args: episodes=${job.episodes}`);
-    const proc = spawn('wsl', ['bash', '-c', job.wrapperCmd], {
-        windowsHide: true,
-        env: Object.assign({}, process.env),
-        cwd: 'C:\\',
-    });
+    const proc = IS_WINDOWS
+        ? spawn('wsl', ['bash', '-c', job.wrapperCmd], {
+            windowsHide: true,
+            env: Object.assign({}, process.env),
+            cwd: 'C:\\',
+        })
+        : spawn('bash', ['-c', job.wrapperCmd], {
+            env: Object.assign({}, process.env),
+            cwd: __dirname,
+        });
     job.process = proc;
     proc.stdin.write(SCRIPT_CONTENT);
     proc.stdin.end();
@@ -181,7 +188,7 @@ function runJob(job) {
             const text = combined.toString('utf16le').replace(/\r\n/g, '\n').replace(/\0/g, '');
             broadcast(text);
         }
-        const NO_DISTRO = code === 4294967295;
+        const NO_DISTRO = IS_WINDOWS && code === 4294967295;
         if (NO_DISTRO) {
             log('WARN', 'Download thread', 'No WSL Linux distribution installed');
             broadcast(
@@ -349,8 +356,8 @@ const server = http.createServer(async (req, res) => {
 
         const id = crypto.randomUUID();
 
-        // Write the script into WSL's own /tmp filesystem via stdin, then run it.
-        // bash -c 'cat > /tmp/x.sh && bash /tmp/x.sh "$@"' -- <args>
+        // Write the script into the active shell runtime's /tmp filesystem via stdin,
+        // then run it. On Windows this is WSL, on Unix-like hosts it is native bash.
         // Embed args directly in the bash -c string so Windows quote-escaping
         // can't corrupt them (passing "$@" through WSL.exe loses the quotes).
         // sanitize() has already removed all shell-special chars; we single-quote
@@ -388,10 +395,11 @@ const server = http.createServer(async (req, res) => {
         const downloadFolderEscaped = currentSettings.downloadFolder.replace(/'/g, "'\\''");
         
         const wrapperCmd =
-            `export ANIWATCH_API_URL='http://${WSL_HOST_IP}:${API_PORT}'; ` +
+            `export ANIWATCH_API_URL='http://${DOWNLOAD_API_HOST}:${API_PORT}'; ` +
             `export ANIWATCH_DL_VIDEO_DIR='${downloadFolderEscaped}'; ` +
             `export ANIWATCH_DL_SEP_LANGS='${sepLangsFlag}'; ` +
-            `echo "Host-IP: ${WSL_HOST_IP} (API: http://${WSL_HOST_IP}:${API_PORT})"; ` +
+            `echo "Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'}"; ` +
+            `echo "API endpoint: http://${DOWNLOAD_API_HOST}:${API_PORT}"; ` +
             // Warn if running inside Docker Desktop's internal WSL distro
             `if grep -qi "docker desktop" /etc/os-release 2>/dev/null; then ` +
             `  echo ""; ` +
@@ -417,6 +425,8 @@ const server = http.createServer(async (req, res) => {
             `    $SUDO apk add --no-cache $MISSING 2>&1; ` +
             `  elif command -v dnf >/dev/null 2>&1; then ` +
             `    $SUDO dnf install -y $MISSING 2>&1; ` +
+            `  elif command -v brew >/dev/null 2>&1; then ` +
+            `    brew install $MISSING 2>&1; ` +
             `  elif command -v pacman >/dev/null 2>&1; then ` +
             `    $SUDO pacman -Sy --noconfirm $MISSING 2>&1; ` +
             `  else ` +

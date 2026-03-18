@@ -14,7 +14,7 @@
   <a href="https://github.com/VeridonNetzwerk/anime-downloader/stargazers">
     <img src="https://img.shields.io/github/stars/VeridonNetzwerk/anime-downloader?style=flat-square" alt="Stars">
   </a>
-  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue?style=flat-square" alt="Platform: Windows 10/11">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=flat-square" alt="Platform: Windows, Linux, macOS">
   <img src="https://img.shields.io/badge/Node.js-24.x-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 24.x">
   <img src="https://img.shields.io/badge/Python-3.13.x-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.13.x">
 </p>
@@ -38,10 +38,10 @@
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| OS | Windows 10 / 11 | Required for launcher and WSL |
+| OS | Windows 10/11, Linux, macOS | Python launcher supports all three |
 | Node.js | 24.x (LTS) | For AniWatch API + download server |
 | Python | **3.13.x** recommended | 3.14+ breaks `curses` on Windows |
-| WSL | Ubuntu distro | Auto-installed by `Option 4` |
+| WSL | Ubuntu distro | Auto-installed by option `4` on Windows |
 
 ---
 
@@ -49,8 +49,13 @@
 
 1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (Source Code (zip))
 2. Extract it...
-3. Double click start-aniwatch.bat
-4. On first run, select **`4` → Install / Repair** — this sets up everything automatically. (If it fails please open an Issue with your latest.log)
+3. Start the launcher:
+
+```bash
+python start-anime-downloader.py
+```
+
+4. On first run, select **`4` → Install / Repair**. The script detects your OS and runs the matching setup flow automatically.
 5. Once done, pick your mode:
 
 | Option | Action | URL |

@@ -2,12 +2,37 @@
 
 ## Prerequisites
 
-- Windows 10 or 11
-- Administator rights on your Local Machine
+- Python 3.10+ installed (3.13.x recommended)
+- Internet connection
+- Permissions to install packages on your system
+
+## Supported Operating Systems
+
+| OS | Supported | Notes |
+|----|-----------|-------|
+| Windows 10/11 | Yes | Option 4 installs/repairs Node.js and WSL + Ubuntu automatically |
+| Linux | Yes | Option 4 installs dependencies via apt, dnf, or pacman |
+| macOS | Yes | Option 4 installs dependencies via Homebrew |
+
+## Launcher
+
+Start the project with:
+
+```bash
+python start-anime-downloader.py
+```
+
+The launcher menu options are:
+
+- `1` AniWorld only
+- `2` AniWatch only
+- `3` Start both
+- `4` Install/Repair all dependencies
+- `5` Exit
 
 ## Dependencies
 
-If you run Option 4 every Dependency will install automatically.
+Option `4` installs or repairs dependencies based on your operating system.
 
 | Component | Version | Purpose | Auto-installed |
 |-----------|---------|---------|----------------|
@@ -15,20 +40,45 @@ If you run Option 4 every Dependency will install automatically.
 | npm | 11+ | Package manager for Node.js | ✓ |
 | Python | 3.13.x (recommended) | AniWorld downloader runtime | ✓ |
 | pip | Latest (in venv) | Python package manager | ✓ |
-| WSL 2 | Latest | Linux subsystem for download tools | ✓ |
-| Ubuntu | Latest LTS | WSL Linux distribution | ✓ |
-| curl | Latest | HTTP client (in WSL) | ✓ |
-| jq | Latest | JSON processor (in WSL) | ✓ |
-| ffmpeg | Latest | Video processing (in WSL) | ✓ |
-| parallel | Latest | Parallel job execution (in WSL) | ✓ |
-| fzf | Latest | Fuzzy finder (in WSL) | ✓ |
+| WSL 2 | Latest | Linux subsystem for download tools (Windows only) | ✓ (Windows) |
+| Ubuntu | Latest LTS | WSL Linux distribution (Windows only) | ✓ (Windows) |
+| curl | Latest | HTTP client for download workflow | ✓ |
+| jq | Latest | JSON processor for API responses | ✓ |
+| ffmpeg | Latest | Video processing | ✓ |
+| parallel | Latest | Parallel segment downloads | ✓ |
+| fzf | Latest | Interactive selection helper | ✓ |
+
+## What Option 4 Does Per OS
+
+### Windows
+
+- Installs/repairs Node.js (winget, then MSI fallback)
+- Enables WSL features and installs Ubuntu distro if missing
+- Rebuilds Python venv for AniWorld (prefers Python 3.13)
+- Runs npm install/build recovery for aniwatch-api
+
+### Linux
+
+- Installs/repairs dependencies via apt, dnf, or pacman
+- Rebuilds Python venv for AniWorld
+- Runs npm install/build recovery for aniwatch-api
+
+### macOS
+
+- Installs/repairs dependencies via Homebrew
+- Rebuilds Python venv for AniWorld
+- Runs npm install/build recovery for aniwatch-api
 
 ## First Setup (Recommended)
 
-1. Run `start-aniwatch.bat`.
-2. Select option `4` (`Install/Repair`).
-3. Wait until progress reaches 100%.
-4. Return to menu and launch option `1`, `2`, or `3`.
+1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
+![Where to find releases](https://i.ibb.co/x8gq7N3R/grafik.png)
+2. Download the Source code (zip) from the latest release.
+![Download Source code (zip)](https://i.ibb.co/QF9HDfd2/grafik.png)
+3. Extract the archive.
+4. Run `python start-anime-downloader.py`.
+5. Select option `4` (`Install/Repair`).
+6. After setup, start option `1`, `2`, or `3`.
 
 ## Notes About Python
 
