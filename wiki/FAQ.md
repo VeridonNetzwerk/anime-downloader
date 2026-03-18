@@ -12,6 +12,12 @@ Python 3.13.x is recommended for the AniWorld part of this setup on Windows.
 
 Node.js LTS is recommended. This project was tested with Node.js 24.x.
 
+## Which source should I use for German or English anime?
+
+Use AniWorld for German Sub / Dub.
+
+Use AniWatch for English Sub / Dub.
+
 ## Where should I report problems?
 
 Use GitHub Issues in this repository.

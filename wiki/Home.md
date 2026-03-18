@@ -22,8 +22,13 @@ The launcher can install/repair dependencies and start services with one menu.
 
 ## Source Websites
 
-- https://anworld.to
-- https://aniwatchtv.to
+- https://anworld.to - best suited for German Sub / Dub
+- https://aniwatchtv.to - best suited for English Sub / Dub
+
+In short:
+
+- Use AniWorld when you mainly want German audio or subtitles.
+- Use AniWatch when you mainly want English audio or subtitles.
 
 ## Legal
 

@@ -14,6 +14,12 @@
 2. Use `3` for full stack startup.
 3. Use `1` or `2` if you only need one side.
 
+## Source Selection
+
+- AniWorld is best suited for German Sub / Dub content.
+- AniWatch is best suited for English Sub / Dub content.
+- If you are unsure, start both with `3` and use the source that matches your preferred language.
+
 ## Endpoints
 
 - AniWorld UI: `http://localhost:8080`

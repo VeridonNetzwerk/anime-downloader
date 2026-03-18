@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📺 AniWorld / AniWatch Downloader
+# 📺 Anime Downloader
 
 **Unified Windows launcher to install, manage, and run AniWorld & AniWatch — from a single menu.**
 
@@ -79,10 +79,13 @@ start-aniwatch.bat
 
 Content can be searched and downloaded from these sites:
 
-| Site | URL |
-|------|-----|
-| AniWorld | https://anworld.to |
-| AniWatch | https://aniwatchtv.to |
+| Site | Best suited for | URL |
+|------|-----------------|-----|
+| AniWorld | German Sub / Dub | https://anworld.to |
+| AniWatch | English Sub / Dub | https://aniwatchtv.to |
+
+If you mainly want German audio or subtitles, start with AniWorld.
+If you mainly want English audio or subtitles, start with AniWatch.
 
 ---
 
