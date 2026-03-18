@@ -5,14 +5,14 @@
 **Unified Windows launcher to install, manage, and run AniWorld & AniWatch — from a single menu.**
 
 <p>
-  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="License: MIT">
+  <a href="https://github.com/VeridonNetzwerk/anime-downloader/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/VeridonNetzwerk/anime-downloader?style=flat-square" alt="License: MIT">
   </a>
-  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/issues">
-    <img src="https://img.shields.io/github/issues/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="Open Issues">
+  <a href="https://github.com/VeridonNetzwerk/anime-downloader/issues">
+    <img src="https://img.shields.io/github/issues/VeridonNetzwerk/anime-downloader?style=flat-square" alt="Open Issues">
   </a>
-  <a href="https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/stargazers">
-    <img src="https://img.shields.io/github/stars/VeridonNetzwerk/aniworld-aniwatch-downloader?style=flat-square" alt="Stars">
+  <a href="https://github.com/VeridonNetzwerk/anime-downloader/stargazers">
+    <img src="https://img.shields.io/github/stars/VeridonNetzwerk/anime-downloader?style=flat-square" alt="Stars">
   </a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue?style=flat-square" alt="Platform: Windows 10/11">
   <img src="https://img.shields.io/badge/Node.js-24.x-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js 24.x">
@@ -91,22 +91,22 @@ If you mainly want English audio or subtitles, start with AniWatch.
 
 ## 📖 Wiki
 
-Full documentation is available in the **[GitHub Wiki](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki)**:
+Full documentation is available in the **[GitHub Wiki](https://github.com/VeridonNetzwerk/anime-downloader/wiki)**:
 
 | Page | Description |
 |------|-------------|
-| [Home](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Home) | Overview and navigation |
-| [Installation](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Installation) | Step-by-step first-time setup |
-| [Usage Guide](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Usage-Guide) | Menu reference, ports, log files |
-| [How It Works](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/How-It-Works) | Architecture and component overview |
-| [Troubleshooting](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/Troubleshooting) | Common errors and fixes |
-| [FAQ](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/wiki/FAQ) | Frequently asked questions |
+| [Home](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Home) | Overview and navigation |
+| [Installation](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation) | Step-by-step first-time setup |
+| [Usage Guide](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Usage-Guide) | Menu reference, ports, log files |
+| [How It Works](https://github.com/VeridonNetzwerk/anime-downloader/wiki/How-It-Works) | Architecture and component overview |
+| [Troubleshooting](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Troubleshooting) | Common errors and fixes |
+| [FAQ](https://github.com/VeridonNetzwerk/anime-downloader/wiki/FAQ) | Frequently asked questions |
 
 ---
 
 ## 🐛 Reporting Issues
 
-Found a bug? Open an [**Issue**](https://github.com/VeridonNetzwerk/aniworld-aniwatch-downloader/issues/new/choose) and include:
+Found a bug? Open an [**Issue**](https://github.com/VeridonNetzwerk/anime-downloader/issues/new/choose) and include:
 
 - Which menu option you used (`1` / `2` / `3` / `4`)
 - What you expected vs. what actually happened
