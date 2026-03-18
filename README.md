@@ -2,7 +2,7 @@
 
 # 📺 Anime Downloader
 
-**Unified Windows launcher to install, manage, and run AniWorld & AniWatch — from a single menu.**
+**Download any anime available on AniWorld & AniWatch — Subbed & Dubbed ;)**
 
 <p>
   <a href="https://github.com/VeridonNetzwerk/anime-downloader/blob/master/LICENSE">
@@ -34,17 +34,6 @@
 
 ---
 
-## 🖥️ Features
-
-- **One-click setup & repair** — `Option 4` installs/heals all dependencies automatically
-- **Auto-recovers npm issues** — falls back through `--ignore-scripts`, npm@10 CI mode, and cache-clean stages
-- **WSL integration** — checks for Ubuntu / installs it automatically via `wsl --install`
-- **Smart Python guards** — detects Python 3.14+ (`curses` incompatible) and recreates the venv
-- **Structured logging** — every run appends `ERROR_CODE=` entries to `latest.log`
-- **Live download queue** — `download-server.mjs` streams progress via SSE to the AniWatch UI
-
----
-
 ## 🛠️ Requirements
 
 | Component | Version | Notes |
@@ -58,30 +47,45 @@
 
 ## 🚀 Quick Start
 
-```bat
-start-aniwatch.bat
-```
-
-1. On first run, select **`4` → Install / Repair** — this sets up everything automatically.
-2. Once done, pick your mode:
+1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (Source Code (zip))
+2. Extract it...
+3. Double click start-aniwatch.bat
+4. On first run, select **`4` → Install / Repair** — this sets up everything automatically. (If it fails please open an Issue with your latest.log)
+5. Once done, pick your mode:
 
 | Option | Action | URL |
 |--------|--------|-----|
-| `1` | AniWorld only | http://localhost:8080 |
-| `2` | AniWatch only | http://localhost:4001 |
-| `3` | Both stacks | http://localhost:8080 + :4001 |
-| `4` | Install / Repair all | — |
+| `1` | AniWorld Downloader | http://localhost:8080 |
+| `2` | AniWatch Downloader | http://localhost:4001 |
+| `3` | Start both | http://localhost:8080 + :4001 |
+| `4` | Install / Repair (all downloaders) | (Run this on first run!) |
 | `5` | Exit | — |
+
+If you have problems with the installation, feel free to check out the **[Installation Page](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation)** in the Github Wiki.
+
+---
+
+## 🙏 Attribution
+
+This project builds on the work of:
+
+| Project | Author |
+|---------|--------|
+| [aniwatch-dl](https://github.com/ruxartic/aniwatch-dl) | ruxartic |
+| [aniwatch-api](https://github.com/ghoshRitesh12/aniwatch-api) | ghoshRitesh12 |
+| [wsl-install](https://github.com/johanwestling/wsl-install) | johanwestling |
+| [nodejs/installer](https://github.com/nodejs/installer) | Node.js team |
+| [AniWorld-Downloader](https://github.com/phoenixthrush/AniWorld-Downloader) | phoenixthrush |
 
 ---
 
 ## 📺 Download Sources
 
-Content can be searched and downloaded from these sites:
+Content can be searched and downloaded from these sites with the Downloaders:
 
 | Site | Best suited for | URL |
 |------|-----------------|-----|
-| AniWorld | German Sub / Dub | https://anworld.to |
+| AniWorld | German Sub / Dub | https://aniworld.to |
 | AniWatch | English Sub / Dub | https://aniwatchtv.to |
 
 If you mainly want German audio or subtitles, start with AniWorld.
@@ -119,7 +123,7 @@ An issue template is pre-filled at `.github/ISSUE_TEMPLATE/bug_report.md`.
 
 ## 💖 Support
 
-If this project saves you time, consider buying me a coffee:
+If you like this project, consider Donating: 
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=972P9WTWE7RBU">
   <img src="https://img.shields.io/badge/Donate-PayPal-0070ba?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal">
@@ -138,19 +142,6 @@ Users are solely responsible for compliance with local laws, copyright regulatio
 ## 🤖 Built With AI
 
 Parts of this project were created and refined with the assistance of AI tools.
-
----
-
-## 🙏 Attribution
-
-This project builds on the work of:
-
-| Project | Author |
-|---------|--------|
-| [aniwatch-dl](https://github.com/ruxartic/aniwatch-dl) | ruxartic |
-| [aniwatch-api](https://github.com/ghoshRitesh12/aniwatch-api) | ghoshRitesh12 |
-| [wsl-install](https://github.com/johanwestling/wsl-install) | johanwestling |
-| [nodejs/installer](https://github.com/nodejs/installer) | Node.js team |
 
 ---
 

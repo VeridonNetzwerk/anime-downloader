@@ -59,6 +59,8 @@ _DEBUG_MODE=false
 _USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 _VIDEO_DIR_PATH="${ANIWATCH_DL_VIDEO_DIR:-$HOME/Videos/AniWatchAnime}"
 _TEMP_DIR_PARENT="${ANIWATCH_DL_TMP_DIR:-${_VIDEO_DIR_PATH}/.tmp}"
+_SEPARATE_LANGS="${ANIWATCH_DL_SEP_LANGS:-0}"
+_LANG_FOLDER=""
 
 _CURL="" _JQ="" _FZF="" _FFMPEG="" _PARALLEL="" _MKTEMP=""
 all_episodes_json_array_for_padding="[]"
@@ -540,7 +542,14 @@ download_episode() {
   subtitles_json=$("$_JQ" -c '.subtitles // []' <<<"$stream_details_json")
   referer_url=$("$_JQ" -r '.referer_url // empty' <<<"$stream_details_json")
 
-  anime_dir="${_VIDEO_DIR_PATH}/${_ANIME_TITLE}"; mkdir -p "$anime_dir"
+  # Determine language folder if separate_langs is enabled
+  if [[ "$_SEPARATE_LANGS" == "1" ]]; then
+    _LANG_FOLDER="english-${_AUDIO_TYPE}"
+    anime_dir="${_VIDEO_DIR_PATH}/${_LANG_FOLDER}/${_ANIME_TITLE}"
+  else
+    anime_dir="${_VIDEO_DIR_PATH}/${_ANIME_TITLE}"
+  fi
+  mkdir -p "$anime_dir"
 
   local total_eps_for_padding; total_eps_for_padding=$(echo "$all_episodes_json_array_for_padding" | "$_JQ" -r '. | length')
   if [[ "$total_eps_for_padding" -gt 999 && ${#ep_num} -lt 4 ]]; then padded_ep_num=$(printf "%04d" "$ep_num")
@@ -685,7 +694,13 @@ main() {
     elif [[ "$total_eps_for_padding" -gt 9 && ${#ep_num_log} -lt 2 ]]; then padded_ep_num=$(printf "%02d" "$ep_num_log")
     else padded_ep_num="$ep_num_log"; fi
 
-    local anime_dir="${_VIDEO_DIR_PATH}/${_ANIME_TITLE}"
+    # Determine language folder if separate_langs is enabled
+    if [[ "$_SEPARATE_LANGS" == "1" ]]; then
+      _LANG_FOLDER="english-${_AUDIO_TYPE}"
+      local anime_dir="${_VIDEO_DIR_PATH}/${_LANG_FOLDER}/${_ANIME_TITLE}"
+    else
+      local anime_dir="${_VIDEO_DIR_PATH}/${_ANIME_TITLE}"
+    fi
     local output_video_path="${anime_dir}/Episode_${padded_ep_num}_${title}.mp4"
 
     echo -e "\n${PURPLE}>>> Processing Episode ${ep_num_log} (${current_ep_idx}/${total_sel_eps}) <<<${NC}"

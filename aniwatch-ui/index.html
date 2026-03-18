@@ -314,6 +314,7 @@ header {
             <input id="searchInput" type="text" placeholder="Anime suchen…" autocomplete="off" spellcheck="false">
             <button type="submit" class="btn btn-primary">Suchen</button>
         </form>
+        <button class="btn btn-sm" id="settingsBtn" onclick="showSettings()" title="Einstellungen">⚙️ Einstellungen</button>
     </div>
 </header>
 
@@ -326,6 +327,34 @@ header {
         <p>Anime suchen und herunterladen</p>
         <p style="font-size:.78rem; margin-top:.3rem; color:#444">Powered by HiAnime via aniwatch-api</p>
     </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsOverlay" class="overlay hidden" onclick="if(event.target.id==='settingsOverlay') closeSettings()">
+<div class="modal" id="settingsModal" onclick="event.stopPropagation()">
+    <button class="modal-x" onclick="closeSettings()">×</button>
+    <div class="modal-layout">
+        <div style="width: 100%; padding: 1.5rem;">
+            <h2>⚙️ Einstellungen</h2>
+            <div style="margin: 1.5rem 0;">
+                <label style="display: block; margin-bottom: 0.5rem;">📁 Download-Verzeichnis</label>
+                <input type="text" id="settingDownloadFolder" placeholder="Windows Downloads-Ordner" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg2); color: var(--text);">
+                <small style="color: var(--muted); display: block; margin-top: 0.5rem;">Leer = Windows Downloads/AniWatch</small>
+            </div>
+            <div style="margin: 1.5rem 0;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="settingSeparateLangs">
+                    <span>Separate languages into folders</span>
+                </label>
+                <small style="color: var(--muted); display: block; margin-top: 0.5rem;">Wenn aktiviert: Downloads in english-sub/, english-dub/ Ordner</small>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Speichern</button>
+                <button class="btn btn-danger btn-sm" onclick="closeSettings()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- Modal -->
@@ -734,6 +763,53 @@ function appendOutput(text) {
     el.textContent += text;
     el.scrollTop = el.scrollHeight;
 }
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+async function loadSettings() {
+    try {
+        const r = await fetch(`${DL}/api/settings`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const settings = await r.json();
+        document.getElementById('settingDownloadFolder').value = settings.downloadFolder || '';
+        document.getElementById('settingSeparateLangs').checked = settings.separateLanguageFolders || false;
+    } catch (err) {
+        console.error('Failed to load settings:', err);
+    }
+}
+
+async function saveSettings() {
+    const body = {
+        downloadFolder: document.getElementById('settingDownloadFolder').value,
+        separateLanguageFolders: document.getElementById('settingSeparateLangs').checked,
+    };
+    try {
+        const r = await fetch(`${DL}/api/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        alert('Einstellungen gespeichert!');
+        closeSettings();
+    } catch (err) {
+        alert('Fehler beim Speichern: ' + err.message);
+    }
+}
+
+function showSettings() {
+    loadSettings();
+    document.getElementById('settingsOverlay').classList.remove('hidden');
+}
+
+function closeSettings() {
+    document.getElementById('settingsOverlay').classList.add('hidden');
+}
+
+// ── Init on load ──────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+});
+
 // ── Queue ─────────────────────────────────────────────────────────────────────────
 let queuePollTimer = null;
 

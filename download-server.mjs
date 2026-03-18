@@ -7,7 +7,7 @@
 
 import http from 'node:http';
 import { spawn } from 'node:child_process';
-import { readFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, appendFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
@@ -18,6 +18,47 @@ const UI_PORT = 4001;
 const API_PORT = 4000;
 const DEBUG_ENABLED = process.env.ANIWATCH_DEBUG !== '0';
 const LOG_PATH = path.join(__dirname, 'latest.log');
+const SETTINGS_PATH = path.join(__dirname, '.aniwatch-settings.json');
+
+// Default settings with Windows Downloads folder fallback
+const DEFAULT_SETTINGS = {
+    downloadFolder: '',
+    separateLanguageFolders: false,
+};
+
+function getDefaultDownloadFolder() {
+    // Try to get Windows Downloads folder
+    const home = process.env.USERPROFILE || process.env.HOME || process.env.HOMEPATH || '';
+    if (home) return path.join(home, 'Downloads', 'AniWatch');
+    return path.join(__dirname, 'downloads');
+}
+
+function loadSettings() {
+    try {
+        if (existsSync(SETTINGS_PATH)) {
+            const data = readFileSync(SETTINGS_PATH, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        // Fall through to defaults
+    }
+    return { ...DEFAULT_SETTINGS };
+}
+
+function saveSettings(settings) {
+    try {
+        writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
+    } catch (e) {
+        // Log but don't crash
+        console.error('Failed to save settings:', e.message);
+    }
+}
+
+let currentSettings = loadSettings();
+if (!currentSettings.downloadFolder) {
+    currentSettings.downloadFolder = getDefaultDownloadFolder();
+    saveSettings(currentSettings);
+}
 
 function timeNow() {
     return new Date().toTimeString().slice(0, 8);
@@ -256,6 +297,37 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // -- GET /api/settings -> get download settings ---------------------------
+    if (req.method === 'GET' && pathname === '/api/settings') {
+        log('INFO', 'HTTP thread', 'Settings request received');
+        json(res, 200, currentSettings);
+        return;
+    }
+
+    // -- POST /api/settings -> update download settings -----------------------
+    if (req.method === 'POST' && pathname === '/api/settings') {
+        log('INFO', 'HTTP thread', 'Settings update request received');
+        let body;
+        try { body = await parseBody(req); }
+        catch (e) {
+            log('ERROR', 'HTTP thread', `Invalid settings request: ${e.message}`);
+            json(res, 400, { error: e.message });
+            return;
+        }
+        
+        if (body.downloadFolder !== undefined) {
+            currentSettings.downloadFolder = String(body.downloadFolder).trim();
+        }
+        if (body.separateLanguageFolders !== undefined) {
+            currentSettings.separateLanguageFolders = Boolean(body.separateLanguageFolders);
+        }
+        
+        saveSettings(currentSettings);
+        log('INFO', 'HTTP thread', `Settings updated: downloadFolder=${currentSettings.downloadFolder}, separateLangs=${currentSettings.separateLanguageFolders}`);
+        json(res, 200, { success: true, settings: currentSettings });
+        return;
+    }
+
     // -- POST /api/download -> start download --------------------------------
     if (req.method === 'POST' && pathname === '/api/download') {
         log('INFO', 'HTTP thread', 'New download request received');
@@ -311,8 +383,14 @@ const server = http.createServer(async (req, res) => {
         // ANIWATCH_API_URL is exported directly (WSLENV is unreliable on some setups).
         // WSL_HOST_IP was resolved on the Windows side at startup (vEthernet WSL adapter).
         // Pass it as a literal so WSL needs no network discovery at all.
+        // Settings: download folder and language folder separation from currentSettings
+        const sepLangsFlag = currentSettings.separateLanguageFolders ? '1' : '0';
+        const downloadFolderEscaped = currentSettings.downloadFolder.replace(/'/g, "'\\''");
+        
         const wrapperCmd =
             `export ANIWATCH_API_URL='http://${WSL_HOST_IP}:${API_PORT}'; ` +
+            `export ANIWATCH_DL_VIDEO_DIR='${downloadFolderEscaped}'; ` +
+            `export ANIWATCH_DL_SEP_LANGS='${sepLangsFlag}'; ` +
             `echo "Host-IP: ${WSL_HOST_IP} (API: http://${WSL_HOST_IP}:${API_PORT})"; ` +
             // Warn if running inside Docker Desktop's internal WSL distro
             `if grep -qi "docker desktop" /etc/os-release 2>/dev/null; then ` +
