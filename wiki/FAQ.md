@@ -2,11 +2,17 @@
 
 ## Is this an official project of upstream services?
 
-No. This launcher is an independent integration layer.
+No. These Downloaders are not affiliated with, endorsed by, or related to AniWorld, AniWatch, or their operators. This is an independent community project that integrates open-source tools and APIs.
+
+## Where does the installer store the downloaded content?
+
+On Default you can find the downloaded content in your Download Folder.
+*Every Downloader has settings to configure this.*
 
 ## Which Python version should I use?
 
-Python 3.13.x is recommended for the AniWorld part of this setup on Windows.
+Python 3.13.x is recommended.
+*Python 3.14.x does not work because it breaks windows_curses.*
 
 ## Which Node.js version should I use?
 
