@@ -159,6 +159,13 @@ def run_command(
 
 def run_windows_elevated(command: str, *, timeout: int, thread: str) -> subprocess.CompletedProcess[bytes]:
     timer = max(timeout, 30)
+    # If already running as administrator, skip the -Verb RunAs indirection
+    if is_admin_windows():
+        log('DEBUG', thread, f'run_elevated (already admin): {command}')
+        result = subprocess.run(['cmd.exe', '/c', command])
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(result.returncode, command)
+        return result
     ps_command = (
         "$cmd = $env:CMD_TO_RUN; "
         "$timeout = [int]$env:CMD_TIMEOUT; "
@@ -327,6 +334,21 @@ def ensure_node_present() -> None:
     raise RuntimeError('Node.js is missing. Run option 4 or install Node.js 24.x LTS manually.')
 
 
+def refresh_node_path() -> None:
+    """Add standard Node.js install directories to PATH so shutil.which finds them."""
+    candidates = [
+        r'C:\Program Files\nodejs',
+        r'C:\Program Files (x86)\nodejs',
+        os.path.expandvars(r'%APPDATA%\nvm\default'),
+    ]
+    current = os.environ.get('PATH', '')
+    lower = current.lower()
+    additions = [p for p in candidates if Path(p).exists() and p.lower() not in lower]
+    if additions:
+        os.environ['PATH'] = os.pathsep.join(additions) + os.pathsep + current
+        log('DEBUG', 'Installer thread', f'PATH extended with: {additions}')
+
+
 def install_node_windows() -> None:
     log('INFO', 'Installer thread', 'Node.js missing. Starting automatic installation')
     render_progress(10, 'Install Node.js LTS automatically')
@@ -352,7 +374,10 @@ def install_node_windows() -> None:
             log('WARN', 'Installer thread', 'winget install failed. Using MSI fallback.')
             install_node_msi_fallback()
     else:
+        log('INFO', 'Installer thread', 'winget not found. Using MSI fallback.')
         install_node_msi_fallback()
+
+    refresh_node_path()
 
     if not (command_exists(node_command()) and command_exists(npm_command())):
         log_error_code('Installer thread', 'NODE_INSTALL_FAILED', 'Node.js is not available after installation')
@@ -362,22 +387,28 @@ def install_node_windows() -> None:
 def install_node_msi_fallback() -> None:
     render_progress(12, 'Download Node.js LTS installer')
     msi_path = Path(os.environ.get('TEMP', str(ROOT_DIR))) / 'aniwatch-node-lts.msi'
+    # Use WebClient for the download — much faster than Invoke-WebRequest on Windows 10
     ps_download = (
-        "$arch = if($env:PROCESSOR_ARCHITECTURE -eq 'ARM64'){'arm64'}elseif($env:PROCESSOR_ARCHITECTURE -eq 'x86'){'x86'}else{'x64'}; "
-        "$index = Invoke-RestMethod 'https://nodejs.org/dist/index.json'; "
-        "$lts = $index | Where-Object { $_.lts } | Select-Object -First 1; "
+        "$arch = if($env:PROCESSOR_ARCHITECTURE -eq 'ARM64'){'arm64'}"
+        "elseif($env:PROCESSOR_ARCHITECTURE -eq 'x86'){'x86'}else{'x64'}; "
+        "$wc = New-Object System.Net.WebClient; "
+        "$json = $wc.DownloadString('https://nodejs.org/dist/index.json') | ConvertFrom-Json; "
+        "$lts = $json | Where-Object { $_.lts } | Select-Object -First 1; "
         "if(-not $lts){ exit 2 }; "
         "$v = $lts.version; "
         "$url = ('https://nodejs.org/dist/{0}/node-{0}-{1}.msi' -f $v, $arch); "
-        "Invoke-WebRequest -Uri $url -OutFile $env:NODE_MSI -UseBasicParsing"
+        "$wc.DownloadFile($url, $env:NODE_MSI)"
     )
     env = os.environ.copy()
     env['NODE_MSI'] = str(msi_path)
-    result = subprocess.run(['powershell', '-NoProfile', '-Command', ps_download], env=env)
+    log('INFO', 'Installer thread', 'Downloading Node.js LTS MSI via WebClient')
+    result = subprocess.run(['powershell', '-NoProfile', '-Command', ps_download], env=env, timeout=600)
     if result.returncode != 0:
         raise RuntimeError('Could not download Node.js MSI')
 
     render_progress(15, 'Install Node.js LTS')
+    # Run msiexec elevated only when not already admin
+    already_admin = IS_WINDOWS and is_admin_windows()
     run_command(
         [
             'msiexec',
@@ -388,7 +419,7 @@ def install_node_msi_fallback() -> None:
         ],
         timeout=1800,
         thread='Installer thread',
-        elevated=True,
+        elevated=not already_admin,
     )
     msi_path.unlink(missing_ok=True)
 
