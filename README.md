@@ -63,6 +63,15 @@
 
 If you have problems with the installation, feel free to check out the **[Installation Page](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation)** in the Github Wiki.
 
+## ⚙️ AniWatch Settings
+
+Use the ⚙️ icon in the AniWatch Downloader UI to configure:
+
+- **Download Folder** — specify where episodes are saved (defaults to Windows Downloads/AniWatch)
+- **Separate Languages** — organize downloads into subfolders by language type (e.g., `english-sub/`, `english-dub/`)
+
+Settings are saved in `.aniwatch-settings.json` and persist across sessions.
+
 ---
 
 ## 🙏 Attribution
