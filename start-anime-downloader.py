@@ -449,6 +449,7 @@ def install_wsl_ubuntu_windows() -> None:
         'Microsoft-Windows-Subsystem-Linux',
         'VirtualMachinePlatform',
     ]
+    reboot_required = False
     for feature in features:
         cmd = [
             'dism.exe',
@@ -458,7 +459,24 @@ def install_wsl_ubuntu_windows() -> None:
             '/all',
             '/norestart',
         ]
-        run_command(cmd, timeout=900, thread='Installer thread', elevated=not is_admin_windows())
+        result = run_command(
+            cmd,
+            timeout=900,
+            thread='Installer thread',
+            elevated=not is_admin_windows(),
+            check=False,
+        )
+        if result.returncode == 3010:
+            reboot_required = True
+            log('WARN', 'Installer thread', f'{feature} enabled. Windows restart required (code 3010).')
+        elif result.returncode != 0:
+            raise RuntimeError(f'Failed to enable {feature} (exit code {result.returncode}).')
+
+    if reboot_required:
+        raise RuntimeError(
+            'Windows restart required to finish enabling WSL features. '
+            'Restart the VM/Windows and run option 4 again.'
+        )
 
     render_progress(25, 'Install Ubuntu distribution')
     run_command(
