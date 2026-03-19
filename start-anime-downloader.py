@@ -330,10 +330,11 @@ def ensure_aniworld() -> None:
 
 
 def patch_aniworld_network_config(vpy: str) -> None:
-    """Disable hardcoded DoH resolver in aniworld on Windows VMs.
+    """Patch aniworld networking defaults for Windows VM compatibility.
 
-    Some VM setups fail TLS verification against dns.google which breaks every
-    aniworld request when Session(resolver=["doh+google://"]) is forced.
+    - Remove hardcoded DoH resolver (dns.google)
+    - Replace niquests Session with requests Session to avoid niquests-specific
+      PreparedRequest issues observed on some Windows 10 VM setups.
     """
     if not IS_WINDOWS:
         return
@@ -344,13 +345,17 @@ def patch_aniworld_network_config(vpy: str) -> None:
         text = cfg_path.read_text(encoding='utf-8')
     except OSError:
         return
-    needle = '    resolver=["doh+google://"],\n'
-    if needle not in text:
+    patched = text
+    patched = patched.replace(
+        'from niquests import RequestException, Session\n',
+        'from requests import RequestException, Session\n',
+    )
+    patched = patched.replace('    resolver=["doh+google://"],\n', '')
+    if patched == text:
         return
-    patched = text.replace(needle, '')
     try:
         cfg_path.write_text(patched, encoding='utf-8')
-        log('WARN', 'AniWorld thread', 'Patched aniworld config: disabled DoH resolver (dns.google).')
+        log('WARN', 'AniWorld thread', 'Patched aniworld config: requests Session + disabled DoH resolver.')
     except OSError:
         pass
     log('INFO', 'AniWorld thread', 'AniWorld environment ready')

@@ -277,6 +277,27 @@ function sanitize(val, maxLen = 200) {
     return clean.length ? clean.slice(0, maxLen) : null;
 }
 
+function normalizeDownloadDirForRuntime(inputPath) {
+    const raw = String(inputPath || '').trim();
+    const withDefault = raw || getDefaultDownloadFolder();
+    if (!IS_WINDOWS) return withDefault;
+
+    // Drive-letter path: C:\foo\bar -> /mnt/c/foo/bar
+    const driveMatch = withDefault.match(/^([A-Za-z]):[\\/](.*)$/);
+    if (driveMatch) {
+        const drive = driveMatch[1].toLowerCase();
+        const rest = driveMatch[2].replace(/\\/g, '/').replace(/^\/+/, '');
+        return `/mnt/${drive}/${rest}`;
+    }
+
+    // UNC path: \\server\share\dir -> //server/share/dir
+    if (withDefault.startsWith('\\\\')) {
+        return `//${withDefault.slice(2).replace(/\\/g, '/')}`;
+    }
+
+    return withDefault.replace(/\\/g, '/');
+}
+
 // -- HTTP Server --------------------------------------------------------------
 
 const server = http.createServer(async (req, res) => {
@@ -392,14 +413,14 @@ const server = http.createServer(async (req, res) => {
         // Pass it as a literal so WSL needs no network discovery at all.
         // Settings: download folder and language folder separation from currentSettings
         const sepLangsFlag = currentSettings.separateLanguageFolders ? '1' : '0';
-        const downloadFolderEscaped = currentSettings.downloadFolder.replace(/'/g, "'\\''");
+        const runtimeDownloadDir = normalizeDownloadDirForRuntime(currentSettings.downloadFolder);
+        const downloadFolderEscaped = runtimeDownloadDir.replace(/'/g, "'\\''");
+        log('INFO', 'Download thread', `Download folder runtime path: ${runtimeDownloadDir}`);
         
         const wrapperCmd =
             `export ANIWATCH_API_URL='http://${DOWNLOAD_API_HOST}:${API_PORT}'; ` +
             `DL_DIR='${downloadFolderEscaped}'; ` +
-            `if command -v wslpath >/dev/null 2>&1 && printf '%s' "$DL_DIR" | grep -Eq '^[A-Za-z]:[\\\\/]'; then ` +
-            `  DL_DIR="$(wslpath -a "$DL_DIR" 2>/dev/null || echo "$DL_DIR")"; ` +
-            `fi; ` +
+            `mkdir -p "$DL_DIR" 2>/dev/null || true; ` +
             `export ANIWATCH_DL_VIDEO_DIR="$DL_DIR"; ` +
             `export ANIWATCH_DL_SEP_LANGS='${sepLangsFlag}'; ` +
             `echo "Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'}"; ` +
