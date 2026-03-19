@@ -548,23 +548,54 @@ def install_unix_tools_non_windows() -> None:
         if command_exists('apt-get'):
             run_command(['sudo', 'apt-get', 'update'], timeout=900, thread='Installer thread')
             run_command(
-                ['sudo', 'apt-get', 'install', '-y', 'nodejs', 'npm', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf'],
+                ['sudo', 'apt-get', 'install', '-y', 'nodejs', 'npm', 'ffmpeg'],
                 timeout=1800,
                 thread='Installer thread',
+            )
+            run_command(
+                ['sudo', 'apt-get', 'install', '-y', 'curl', 'jq', 'parallel', 'fzf'],
+                timeout=900,
+                thread='Installer thread',
+                check=False,
             )
             return
         if command_exists('dnf'):
             run_command(
-                ['sudo', 'dnf', 'install', '-y', 'nodejs', 'npm', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf'],
+                ['sudo', 'dnf', 'install', '-y', 'nodejs', 'npm', 'ffmpeg'],
                 timeout=1800,
                 thread='Installer thread',
+            )
+            run_command(
+                ['sudo', 'dnf', 'install', '-y', 'curl', 'jq', 'parallel', 'fzf'],
+                timeout=900,
+                thread='Installer thread',
+                check=False,
             )
             return
         if command_exists('pacman'):
             run_command(
-                ['sudo', 'pacman', '-Sy', '--noconfirm', 'nodejs', 'npm', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf'],
+                ['sudo', 'pacman', '-Sy', '--noconfirm', 'nodejs', 'npm', 'ffmpeg'],
                 timeout=1800,
                 thread='Installer thread',
+            )
+            run_command(
+                ['sudo', 'pacman', '-Sy', '--noconfirm', 'curl', 'jq', 'parallel', 'fzf'],
+                timeout=900,
+                thread='Installer thread',
+                check=False,
+            )
+            return
+        if command_exists('zypper'):
+            run_command(
+                ['sudo', 'zypper', '--non-interactive', 'install', 'nodejs', 'npm', 'ffmpeg'],
+                timeout=1800,
+                thread='Installer thread',
+            )
+            run_command(
+                ['sudo', 'zypper', '--non-interactive', 'install', 'curl', 'jq', 'parallel', 'fzf'],
+                timeout=900,
+                thread='Installer thread',
+                check=False,
             )
             return
         raise RuntimeError('Unsupported Linux package manager. Install dependencies manually and rerun option 4.')
@@ -572,7 +603,8 @@ def install_unix_tools_non_windows() -> None:
     if IS_MACOS:
         if not command_exists('brew'):
             raise RuntimeError('Homebrew is required on macOS for option 4. Install Homebrew and rerun.')
-        run_command(['brew', 'install', 'node', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf'], timeout=1800, thread='Installer thread')
+        run_command(['brew', 'install', 'node', 'ffmpeg'], timeout=1800, thread='Installer thread')
+        run_command(['brew', 'install', 'curl', 'jq', 'parallel', 'fzf'], timeout=900, thread='Installer thread', check=False)
         return
 
     raise RuntimeError(f'Unsupported operating system: {platform.system()}')
@@ -652,26 +684,24 @@ def ensure_runtime_shell_dependencies() -> None:
             raise RuntimeError('ffmpeg is missing on Windows. Install/repair (option 4) failed.')
         return
 
-    missing = [tool for tool in ('bash', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf') if not command_exists(tool)]
-    if missing:
-        raise RuntimeError('Missing shell tools: ' + ', '.join(missing) + '. Run option 4 first.')
+    if not command_exists('ffmpeg'):
+        raise RuntimeError('ffmpeg is missing. Run option 4 first.')
 
 
 def auto_install_platform() -> None:
-    render_progress(6, 'Check/install Node.js')
-    if not (command_exists(node_command()) and command_exists(npm_command())):
-        if IS_WINDOWS:
-            install_node_windows()
-        else:
-            install_unix_tools_non_windows()
-
-    render_progress(20, 'Check native download runtime')
+    render_progress(6, 'Check/install platform packages')
     if IS_WINDOWS:
+        if not (command_exists(node_command()) and command_exists(npm_command())):
+            install_node_windows()
+
+        render_progress(20, 'Check native download runtime')
         refresh_ffmpeg_path()
         if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
             install_ffmpeg_windows()
-    else:
-        install_unix_tools_non_windows()
+        return
+
+    # On non-Windows systems, package installation also covers ffmpeg/runtime.
+    install_unix_tools_non_windows()
 
 
 def install_repair() -> None:

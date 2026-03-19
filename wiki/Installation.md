@@ -8,24 +8,33 @@
 
 ## Supported Operating Systems
 
-| OS | Supported | Notes |
-|----|-----------|-------|
-| Windows 10/11 | Yes | Option 4 installs/repairs Node.js and FFmpeg automatically |
-| Linux | Yes | Option 4 installs dependencies via apt, dnf, or pacman |
-| macOS | Yes | Option 4 installs dependencies via Homebrew |
+| OS          | Version           | Architecture      | Python       | Status           | Release      |
+| ----------- | ----------------- | ----------------- | ------------ | ---------------- | ------------ |
+| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13.x       | ✅ Working       | v1.2.1       |
+| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13.x       | ✅ Working       | v1.2.1       |
+| Windows     | 8.1               | x86 / x64         | ≤3.10        | ❌ Not Supported | -            |
+| Windows     | 8                 | x86 / x64         | ≤3.9         | ❌ Not Supported | -            |
+| Windows     | 7 (SP1)           | x86 / x64         | ≤3.8         | ❌ Not Supported | -            |
+| Windows     | XP (SP3)          | x86               | ≤3.4         | ❌ Not Supported | -            |
+| Ubuntu      | 22.04 LTS         | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
+| Ubuntu      | 24.04 LTS         | x64 / ARM64       | 3.12+        | ⚠️ Untested      | -            |
+| Debian      | 11 (Bullseye)     | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| Debian      | 12 (Bookworm)     | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| Debian      | 13 (Trixie)       | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| Fedora      | 39+               | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| Arch Linux  | 2025.01.01+       | x64               | 3.12+        | ⚠️ Untested      | -            |
+| Linux Mint  | 21.x              | x64               | 3.10+        | ⚠️ Untested      | -            |
+| openSUSE    | Leap / Tumbleweed | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
+| macOS       | 13 Ventura        | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
+| macOS       | 14 Sonoma         | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| ChromeOS    | ChromeOS          | x86 / x64 / ARM   | ?            | ❌ Not Supported | -            |
+| FydeOS      | Latest            | x86 / x64 / ARM   | ?            | ❌ Not Supported | -            |
+| ReactOS     | 0.4.15            | x86               | 3.4–3.8      | ❌ Not Supported | -            |
+| Haiku       | R1 Beta 4         | x64               | 3.10         | ❌ Not Supported | -            |
+| FreeBSD     | 13 / 14           | x64 / ARM64       | 3.9+         | ❌ Not Supported | -            |
+| OpenBSD     | 7.x               | x64 / ARM64       | 3.9+         | ❌ Not Supported | -            |
 
-## Tested Configurations
-
-| OS | Version | Architecture | Python | Status | Notes |
-|----|---------|--------------|--------|--------|-------|
-| Windows | 10 (22H2) | x64 | 3.13.x | ✅ Working | Tested on fresh VM; FFmpeg portable fallback active |
-| Windows | 11 (24H2) | x64 | 3.13.x | ✅ Working | Tested on development machine |
-| Linux | Ubuntu 22.04 LTS | x64 | 3.10+ | ⚠️ Untested | Expected to work; apt install path implemented |
-| Linux | Fedora 39+ | x64 | 3.10+ | ⚠️ Untested | Expected to work; dnf install path implemented |
-| Linux | Arch Linux | x64 | 3.10+ | ⚠️ Untested | Expected to work; pacman install path implemented |
-| macOS | 13 Ventura+ | x64 / ARM | 3.10+ | ⚠️ Untested | Expected to work; Homebrew install path implemented |
-
-> **Legend:** ✅ Confirmed working — ⚠️ Implemented but not yet tested on real hardware
+> **Legend:** ✅ Confirmed working — ⚠️ Implemented but not tested - ❌ Not Implemented
 
 ## Launcher
 
@@ -66,7 +75,7 @@ Option `4` installs or repairs dependencies based on your operating system.
 
 ### Linux
 
-- Installs/repairs dependencies via apt, dnf, or pacman
+- Installs/repairs dependencies via apt, dnf, pacman, or zypper
 - Rebuilds Python venv for AniWorld
 - Runs npm install/build recovery for aniwatch-api
 
