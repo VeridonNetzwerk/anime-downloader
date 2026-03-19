@@ -41,7 +41,7 @@
 | OS | Windows 10/11, Linux, macOS | Python launcher supports all three |
 | Node.js | 24.x (LTS) | For AniWatch API + download server |
 | Python | **3.13.x** recommended | 3.14+ breaks `curses` on Windows |
-| WSL | Ubuntu distro | Auto-installed by option `4` on Windows |
+| FFmpeg | Latest | Required for native video download/merge |
 
 ---
 
@@ -87,7 +87,6 @@ This project builds on the work of:
 |---------|--------|
 | [aniwatch-dl](https://github.com/ruxartic/aniwatch-dl) | ruxartic |
 | [aniwatch-api](https://github.com/ghoshRitesh12/aniwatch-api) | ghoshRitesh12 |
-| [wsl-install](https://github.com/johanwestling/wsl-install) | johanwestling |
 | [nodejs/installer](https://github.com/nodejs/installer) | Node.js team |
 | [AniWorld-Downloader](https://github.com/phoenixthrush/AniWorld-Downloader) | phoenixthrush |
 

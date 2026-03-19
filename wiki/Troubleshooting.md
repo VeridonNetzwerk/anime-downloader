@@ -22,16 +22,15 @@ The launcher has staged recovery:
 Fix:
 - Run option `4` and inspect `latest.log` for `ERROR_CODE=` entries.
 
-## 3) WSL/Ubuntu not found
+## 3) FFmpeg not found (Windows)
 
 Fix:
 1. Run option `4`.
-2. Reboot Windows if prompted.
-3. Run option `4` again.
+2. Restart terminal/launcher so updated PATH is loaded.
+3. Run option `4` again if needed.
 
 Note:
-- This only applies to Windows.
-- On Linux/macOS, option `4` uses native package managers instead of WSL.
+- On Linux/macOS, option `4` installs FFmpeg via native package managers.
 
 ## 4) API not available on port 4000
 

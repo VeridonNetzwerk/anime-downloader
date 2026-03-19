@@ -10,7 +10,7 @@
 
 | OS | Supported | Notes |
 |----|-----------|-------|
-| Windows 10/11 | Yes | Option 4 installs/repairs Node.js and WSL + Ubuntu automatically |
+| Windows 10/11 | Yes | Option 4 installs/repairs Node.js and FFmpeg automatically |
 | Linux | Yes | Option 4 installs dependencies via apt, dnf, or pacman |
 | macOS | Yes | Option 4 installs dependencies via Homebrew |
 
@@ -40,20 +40,14 @@ Option `4` installs or repairs dependencies based on your operating system.
 | npm | 11+ | Package manager for Node.js | ✓ |
 | Python | 3.13.x (recommended) | AniWorld downloader runtime | ✓ |
 | pip | Latest (in venv) | Python package manager | ✓ |
-| WSL 2 | Latest | Linux subsystem for download tools (Windows only) | ✓ (Windows) |
-| Ubuntu | Latest LTS | WSL Linux distribution (Windows only) | ✓ (Windows) |
-| curl | Latest | HTTP client for download workflow | ✓ |
-| jq | Latest | JSON processor for API responses | ✓ |
 | ffmpeg | Latest | Video processing | ✓ |
-| parallel | Latest | Parallel segment downloads | ✓ |
-| fzf | Latest | Interactive selection helper | ✓ |
 
 ## What Option 4 Does Per OS
 
 ### Windows
 
 - Installs/repairs Node.js (winget, then MSI fallback)
-- Enables WSL features and installs Ubuntu distro if missing
+- Installs/repairs FFmpeg for native video downloading
 - Rebuilds Python venv for AniWorld (prefers Python 3.13)
 - Runs npm install/build recovery for aniwatch-api
 

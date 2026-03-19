@@ -24,7 +24,7 @@ python start-anime-downloader.py
 
 OS behavior for option `4`:
 
-- Windows: installs/repairs Node.js and WSL + Ubuntu
+- Windows: installs/repairs Node.js and FFmpeg
 - Linux: installs dependencies via apt/dnf/pacman
 - macOS: installs dependencies via Homebrew
 

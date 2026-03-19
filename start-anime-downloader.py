@@ -493,100 +493,6 @@ def is_admin_windows() -> bool:
         return False
 
 
-def ensure_wsl_distribution() -> bool:
-    if not IS_WINDOWS:
-        return True
-    if not command_exists('wsl'):
-        return False
-    result = subprocess.run(['wsl', '-l', '-q'], capture_output=True, text=True)
-    if result.returncode != 0:
-        return False
-    distros = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    return len(distros) > 0
-
-
-def install_wsl_ubuntu_windows() -> None:
-    render_progress(22, 'Enable WSL features')
-    reboot_required = False
-    wsl_feature = 'Microsoft-Windows-Subsystem-Linux'
-    vm_platform_feature = 'VirtualMachinePlatform'
-
-    def enable_feature(feature: str, *, required: bool) -> bool:
-        nonlocal reboot_required
-        cmd = [
-            'dism.exe',
-            '/online',
-            '/enable-feature',
-            f'/featurename:{feature}',
-            '/all',
-            '/norestart',
-        ]
-        result = run_command(
-            cmd,
-            timeout=900,
-            thread='Installer thread',
-            elevated=not is_admin_windows(),
-            check=False,
-        )
-        if result.returncode == 3010:
-            reboot_required = True
-            log('WARN', 'Installer thread', f'{feature} enabled. Windows restart required (code 3010).')
-            return True
-        if result.returncode == 0:
-            return True
-        if required:
-            raise RuntimeError(f'Failed to enable {feature} (exit code {result.returncode}).')
-        log(
-            'WARN',
-            'Installer thread',
-            f'Could not enable {feature} (exit code {result.returncode}). Falling back to WSL1 mode.',
-        )
-        return False
-
-    enable_feature(wsl_feature, required=True)
-    vm_platform_ok = enable_feature(vm_platform_feature, required=False)
-
-    if reboot_required:
-        raise RuntimeError(
-            'Windows restart required to finish enabling WSL features. '
-            'Restart the VM/Windows and run option 4 again.'
-        )
-
-    render_progress(25, 'Install Ubuntu distribution')
-    if not vm_platform_ok:
-        run_command(
-            ['wsl', '--set-default-version', '1'],
-            timeout=120,
-            thread='Installer thread',
-            elevated=not is_admin_windows(),
-            check=False,
-        )
-
-    result = run_command(
-        ['wsl', '--install', '-d', 'Ubuntu', '--no-launch'],
-        timeout=1800,
-        thread='Installer thread',
-        elevated=not is_admin_windows(),
-        check=False,
-    )
-    if result.returncode != 0:
-        log('WARN', 'Installer thread', 'wsl --install with --no-launch failed. Retrying without --no-launch.')
-        result = run_command(
-            ['wsl', '--install', '-d', 'Ubuntu'],
-            timeout=1800,
-            thread='Installer thread',
-            elevated=not is_admin_windows(),
-            check=False,
-        )
-    if result.returncode != 0:
-        if not vm_platform_ok:
-            raise RuntimeError(
-                'Ubuntu installation via wsl.exe failed in VM fallback mode. '
-                'Install Ubuntu manually from Microsoft Store, then run option 4 again.'
-            )
-        raise RuntimeError(f'Ubuntu WSL installation failed (exit code {result.returncode}).')
-
-
 def install_unix_tools_non_windows() -> None:
     if IS_LINUX:
         if command_exists('apt-get'):
@@ -685,36 +591,6 @@ def ensure_download_server_running() -> None:
         return
     log('INFO', 'AniWatch UI thread', 'Starting download server on port 4001')
     start_process([node_command(), 'download-server.mjs'], cwd=ROOT_DIR, title='AniWatch UI server')
-
-
-def wsl_command_exists(tool: str) -> bool:
-    """Check if a command is available inside the default WSL distribution."""
-    result = subprocess.run(
-        ['wsl', '--', 'which', tool],
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0
-
-
-def install_wsl_tools() -> None:
-    """Install required shell tools inside WSL using apt-get."""
-    tools = ['curl', 'jq', 'fzf', 'ffmpeg', 'parallel']
-    missing = [t for t in tools if not wsl_command_exists(t)]
-    if not missing:
-        log('INFO', 'Installer thread', 'WSL tools already installed')
-        return
-    log('INFO', 'Installer thread', f'Installing missing WSL tools: {missing}')
-    render_progress(28, 'Install tools in WSL')
-    install_cmd = 'apt-get update -q -y && apt-get install -y ' + ' '.join(missing)
-    result = subprocess.run(
-        ['wsl', '--user', 'root', '--', 'bash', '-c', install_cmd],
-        timeout=1800,
-    )
-    if result.returncode != 0:
-        log('WARN', 'Installer thread', 'apt-get failed for some WSL tools; downloads may be affected')
-    else:
-        log('INFO', 'Installer thread', 'WSL tools installed successfully')
 
 
 def ensure_runtime_shell_dependencies() -> None:

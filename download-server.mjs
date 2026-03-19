@@ -324,7 +324,7 @@ const server = http.createServer(async (req, res) => {
 
         const id = crypto.randomUUID();
 
-        // Native Python downloader (no WSL / bash).
+        // Native Python downloader.
         const episodes = sanitize(body.episodes) || '*';
         const resolution = sanitize(body.resolution) || '';
         const srv = sanitize(body.server) || '';
