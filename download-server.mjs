@@ -396,7 +396,11 @@ const server = http.createServer(async (req, res) => {
         
         const wrapperCmd =
             `export ANIWATCH_API_URL='http://${DOWNLOAD_API_HOST}:${API_PORT}'; ` +
-            `export ANIWATCH_DL_VIDEO_DIR='${downloadFolderEscaped}'; ` +
+            `DL_DIR='${downloadFolderEscaped}'; ` +
+            `if command -v wslpath >/dev/null 2>&1 && printf '%s' "$DL_DIR" | grep -Eq '^[A-Za-z]:[\\\\/]'; then ` +
+            `  DL_DIR="$(wslpath -a "$DL_DIR" 2>/dev/null || echo "$DL_DIR")"; ` +
+            `fi; ` +
+            `export ANIWATCH_DL_VIDEO_DIR="$DL_DIR"; ` +
             `export ANIWATCH_DL_SEP_LANGS='${sepLangsFlag}'; ` +
             `echo "Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'}"; ` +
             `echo "API endpoint: http://${DOWNLOAD_API_HOST}:${API_PORT}"; ` +

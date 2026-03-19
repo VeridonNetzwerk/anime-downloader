@@ -326,6 +326,33 @@ def ensure_aniworld() -> None:
 
     render_progress(63, 'Test aniworld package')
     run_command([vpy, '-m', 'pip', 'show', 'aniworld'], timeout=60, thread='AniWorld thread')
+    patch_aniworld_network_config(vpy)
+
+
+def patch_aniworld_network_config(vpy: str) -> None:
+    """Disable hardcoded DoH resolver in aniworld on Windows VMs.
+
+    Some VM setups fail TLS verification against dns.google which breaks every
+    aniworld request when Session(resolver=["doh+google://"]) is forced.
+    """
+    if not IS_WINDOWS:
+        return
+    cfg_path = Path(vpy).resolve().parent.parent / 'Lib' / 'site-packages' / 'aniworld' / 'config.py'
+    if not cfg_path.exists():
+        return
+    try:
+        text = cfg_path.read_text(encoding='utf-8')
+    except OSError:
+        return
+    needle = '    resolver=["doh+google://"],\n'
+    if needle not in text:
+        return
+    patched = text.replace(needle, '')
+    try:
+        cfg_path.write_text(patched, encoding='utf-8')
+        log('WARN', 'AniWorld thread', 'Patched aniworld config: disabled DoH resolver (dns.google).')
+    except OSError:
+        pass
     log('INFO', 'AniWorld thread', 'AniWorld environment ready')
 
 
@@ -794,6 +821,8 @@ def ensure_aniworld_ready() -> None:
     if check.returncode != 0:
         log('WARN', 'AniWorld thread', 'AniWorld package not verified, repairing.')
         ensure_aniworld()
+        return
+    patch_aniworld_network_config(str(vpy))
 
 
 def start_aniworld() -> None:
