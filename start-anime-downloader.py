@@ -187,8 +187,11 @@ def run_windows_elevated(command: str, *, timeout: int, thread: str) -> subproce
 def pick_windows_python_bootstrap() -> list[str] | None:
     for ver in ('3.13', '3.12', '3.11', '3.10'):
         cmd = ['py', f'-{ver}', '--version']
-        if subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
-            return ['py', f'-{ver}']
+        try:
+            if subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                return ['py', f'-{ver}']
+        except OSError:
+            pass
 
     if command_exists('winget'):
         log('INFO', 'AniWorld thread', 'No Python <=3.13 found. Installing Python 3.13 via winget')
@@ -211,8 +214,11 @@ def pick_windows_python_bootstrap() -> list[str] | None:
             )
         except subprocess.CalledProcessError:
             pass
-        if subprocess.run(['py', '-3.13', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
-            return ['py', '-3.13']
+        try:
+            if subprocess.run(['py', '-3.13', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                return ['py', '-3.13']
+        except OSError:
+            pass
 
     if command_exists('py'):
         return ['py', '-3']
@@ -227,11 +233,13 @@ def create_venv_with_bootstrap() -> None:
 
     bootstrap = [sys.executable]
     if IS_WINDOWS:
-        picked = pick_windows_python_bootstrap()
-        if not picked:
-            log_error_code('AniWorld thread', 'PYTHON_NOT_FOUND', 'No compatible Python interpreter available')
-            raise RuntimeError('No Python interpreter found. Install Python 3.13.x and retry.')
-        bootstrap = picked
+        # Prefer the currently running interpreter when it is compatible.
+        if not (sys.version_info.major == 3 and sys.version_info.minor <= 13):
+            picked = pick_windows_python_bootstrap()
+            if not picked:
+                log_error_code('AniWorld thread', 'PYTHON_NOT_FOUND', 'No compatible Python interpreter available')
+                raise RuntimeError('No Python interpreter found. Install Python 3.13.x and retry.')
+            bootstrap = picked
 
     log('INFO', 'AniWorld thread', f'Creating Python venv in {VENV_DIR}')
     run_command(bootstrap + ['-m', 'venv', str(VENV_DIR)], timeout=600, thread='AniWorld thread')
