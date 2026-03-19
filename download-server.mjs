@@ -2,7 +2,7 @@
  * AniWatch Download Server (port 4001)
  * - Serves the Web UI at /
  * - Proxies aniwatch-api requests (/api/v2/*) to localhost:4000
- * - Handles download jobs via WSL + aniwatch-dl.sh
+ * - Handles download jobs via native Python script aniwatch-dl.py
  */
 
 import http from 'node:http';
@@ -11,7 +11,6 @@ import { readFileSync, appendFileSync, writeFileSync, existsSync } from 'node:fs
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
-import { networkInterfaces } from 'node:os';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UI_PORT = 4001;
@@ -85,45 +84,26 @@ function debug(thread, message) {
     }
 }
 
-// Determine the Windows-side IP that WSL 2 can reach.
-// Node.js runs on Windows and can read the vEthernet (WSL) adapter directly -
-// no guessing needed inside WSL.
-function getWslHostIp() {
-    const nets = networkInterfaces();
-    // Primary: the dedicated WSL virtual adapter
-    for (const [name, addrs] of Object.entries(nets)) {
-        if (/wsl/i.test(name)) {
-            for (const addr of addrs) {
-                if (addr.family === 'IPv4' && !addr.internal) return addr.address;
-            }
-        }
-    }
-    // Secondary: any vEthernet adapter (Hyper-V)
-    for (const [name, addrs] of Object.entries(nets)) {
-        if (/vethernet/i.test(name)) {
-            for (const addr of addrs) {
-                if (addr.family === 'IPv4' && !addr.internal) return addr.address;
-            }
-        }
-    }
-    return 'localhost'; // WSL 1 or single-NIC fallback
-}
-const DOWNLOAD_API_HOST = IS_WINDOWS ? getWslHostIp() : '127.0.0.1';
-log('INFO', 'Server thread', `Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'} (${process.platform})`);
+const DOWNLOAD_API_HOST = '127.0.0.1';
+const PY_DOWNLOADER = path.join(__dirname, 'aniwatch-dl.py');
+const PYTHON_EXE = IS_WINDOWS
+    ? (existsSync(path.join(__dirname, '.venv', 'Scripts', 'python.exe'))
+        ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
+        : 'python')
+    : (existsSync(path.join(__dirname, '.venv', 'bin', 'python'))
+        ? path.join(__dirname, '.venv', 'bin', 'python')
+        : 'python3');
+
+log('INFO', 'Server thread', `Download runtime: native-python (${process.platform})`);
 log('INFO', 'Server thread', `Download API host detected: ${DOWNLOAD_API_HOST}`);
 debug('Server thread', `DEBUG enabled: ${DEBUG_ENABLED}`);
-
-// Read the shell script once at startup.
-// At spawn time we pipe it via stdin into WSL itself (/tmp/aniwatch-<id>.sh),
-// so there are zero Windows-to-WSL path translation issues.
-const SCRIPT_CONTENT = readFileSync(path.join(__dirname, 'aniwatch-dl.sh'));
 
 
 // Strip ANSI escape codes from terminal output
 const ANSI_RE = /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g;
 const stripAnsi = (s) => s.replace(ANSI_RE, '');
 
-// Job store: id -> { id, title, episodes, wrapperCmd, status, process, clients, output, exitCode }
+// Job store: id -> { id, title, episodes, command, args, env, status, process, clients, output, exitCode }
 const jobs = new Map();
 const jobQueue = []; // job IDs in submission order
 
@@ -141,19 +121,12 @@ function runJob(job) {
     job.status = 'running';
     log('INFO', 'Download thread', `Job started: ${job.id} (${job.title})`);
     debug('Download thread', `Job args: episodes=${job.episodes}`);
-    const proc = IS_WINDOWS
-        ? spawn('wsl', ['bash', '-c', job.wrapperCmd], {
-            windowsHide: true,
-            env: Object.assign({}, process.env),
-            cwd: 'C:\\',
-        })
-        : spawn('bash', ['-c', job.wrapperCmd], {
-            env: Object.assign({}, process.env),
-            cwd: __dirname,
-        });
+    const proc = spawn(job.command, job.args, {
+        windowsHide: true,
+        env: Object.assign({}, process.env, job.env || {}),
+        cwd: __dirname,
+    });
     job.process = proc;
-    proc.stdin.write(SCRIPT_CONTENT);
-    proc.stdin.end();
 
     const broadcast = (text) => {
         const clean = stripAnsi(text);
@@ -172,8 +145,8 @@ function runJob(job) {
     proc.stdout.on('data', handleChunk);
     proc.stderr.on('data', handleChunk);
     proc.on('error', (err) => {
-        log('ERROR', 'Download thread', `Could not start WSL process: ${err.message}`);
-        broadcast(`\n[ERROR] Could not start WSL: ${err.message}\n`);
+        log('ERROR', 'Download thread', `Could not start downloader process: ${err.message}`);
+        broadcast(`\n[ERROR] Could not start downloader process: ${err.message}\n`);
         job.status = 'error';
         job.exitCode = -1;
         const doneMsg = `event: done\ndata: -1\n\n`;
@@ -187,16 +160,6 @@ function runJob(job) {
             const combined = Buffer.concat(utf16Bufs);
             const text = combined.toString('utf16le').replace(/\r\n/g, '\n').replace(/\0/g, '');
             broadcast(text);
-        }
-        const NO_DISTRO = IS_WINDOWS && code === 4294967295;
-        if (NO_DISTRO) {
-            log('WARN', 'Download thread', 'No WSL Linux distribution installed');
-            broadcast(
-                '\nWarning: No WSL Linux distribution installed.\n' +
-                'Fix: Open PowerShell as Administrator and run:\n\n' +
-                '    wsl --install\n\n' +
-                'Then restart Windows. Recommended distro: Ubuntu.\n'
-            );
         }
         job.status = code === 0 ? 'done' : 'error';
         job.exitCode = code ?? -1;
@@ -279,23 +242,7 @@ function sanitize(val, maxLen = 200) {
 
 function normalizeDownloadDirForRuntime(inputPath) {
     const raw = String(inputPath || '').trim();
-    const withDefault = raw || getDefaultDownloadFolder();
-    if (!IS_WINDOWS) return withDefault;
-
-    // Drive-letter path: C:\foo\bar -> /mnt/c/foo/bar
-    const driveMatch = withDefault.match(/^([A-Za-z]):[\\/](.*)$/);
-    if (driveMatch) {
-        const drive = driveMatch[1].toLowerCase();
-        const rest = driveMatch[2].replace(/\\/g, '/').replace(/^\/+/, '');
-        return `/mnt/${drive}/${rest}`;
-    }
-
-    // UNC path: \\server\share\dir -> //server/share/dir
-    if (withDefault.startsWith('\\\\')) {
-        return `//${withDefault.slice(2).replace(/\\/g, '/')}`;
-    }
-
-    return withDefault.replace(/\\/g, '/');
+    return raw || getDefaultDownloadFolder();
 }
 
 // -- HTTP Server --------------------------------------------------------------
@@ -377,99 +324,41 @@ const server = http.createServer(async (req, res) => {
 
         const id = crypto.randomUUID();
 
-        // Write the script into the active shell runtime's /tmp filesystem via stdin,
-        // then run it. On Windows this is WSL, on Unix-like hosts it is native bash.
-        // Embed args directly in the bash -c string so Windows quote-escaping
-        // can't corrupt them (passing "$@" through WSL.exe loses the quotes).
-        // sanitize() has already removed all shell-special chars; we single-quote
-        // each value for defence-in-depth. Single quotes cannot appear in sanitized values.
-        const sq = (s) => `'${s}'`;
-
-        const wslScriptPath = `/tmp/aniwatch-${id}.sh`;
-        const scriptArgs = [];
-        if (animeId)   scriptArgs.push('-i', sq(animeId));
-        else           scriptArgs.push('-a', sq(animeName));
-
-        const episodes = sanitize(body.episodes);
-        if (episodes) scriptArgs.push('-e', sq(episodes));
-
-        scriptArgs.push('-o', body.audio === 'dub' ? 'dub' : 'sub');
-
-        const resolution = sanitize(body.resolution);
-        if (resolution && /^\d+$/.test(resolution)) scriptArgs.push('-r', resolution);
-
-        const srv = sanitize(body.server);
-        if (srv) scriptArgs.push('-S', sq(srv));
-
-        const subtitles = sanitize(body.subtitles);
-        if (subtitles) scriptArgs.push('-L', sq(subtitles));
-
+        // Native Python downloader (no WSL / bash).
+        const episodes = sanitize(body.episodes) || '*';
+        const resolution = sanitize(body.resolution) || '';
+        const srv = sanitize(body.server) || '';
+        const subtitles = sanitize(body.subtitles) || 'default';
         const threads = parseInt(body.threads);
-        scriptArgs.push('-t', String(Number.isNaN(threads) ? 4 : Math.min(Math.max(threads, 1), 16)));
+        const threadsValue = String(Number.isNaN(threads) ? 4 : Math.min(Math.max(threads, 1), 16));
 
-        // All args are now embedded in the bash -c string - no $@ needed
-        // ANIWATCH_API_URL is exported directly (WSLENV is unreliable on some setups).
-        // WSL_HOST_IP was resolved on the Windows side at startup (vEthernet WSL adapter).
-        // Pass it as a literal so WSL needs no network discovery at all.
-        // Settings: download folder and language folder separation from currentSettings
         const sepLangsFlag = currentSettings.separateLanguageFolders ? '1' : '0';
         const runtimeDownloadDir = normalizeDownloadDirForRuntime(currentSettings.downloadFolder);
-        const downloadFolderEscaped = runtimeDownloadDir.replace(/'/g, "'\\''");
         log('INFO', 'Download thread', `Download folder runtime path: ${runtimeDownloadDir}`);
-        
-        const wrapperCmd =
-            `export ANIWATCH_API_URL='http://${DOWNLOAD_API_HOST}:${API_PORT}'; ` +
-            `DL_DIR='${downloadFolderEscaped}'; ` +
-            `mkdir -p "$DL_DIR" 2>/dev/null || true; ` +
-            `export ANIWATCH_DL_VIDEO_DIR="$DL_DIR"; ` +
-            `export ANIWATCH_DL_SEP_LANGS='${sepLangsFlag}'; ` +
-            `echo "Download runtime: ${IS_WINDOWS ? 'WSL' : 'native bash'}"; ` +
-            `echo "API endpoint: http://${DOWNLOAD_API_HOST}:${API_PORT}"; ` +
-            // Warn if running inside Docker Desktop's internal WSL distro
-            `if grep -qi "docker desktop" /etc/os-release 2>/dev/null; then ` +
-            `  echo ""; ` +
-            `  echo "ERROR: You are using the Docker Desktop WSL distro."; ` +
-            `  echo "This distro is intended for containers, not downloads."; ` +
-            `  echo ""; ` +
-            `  echo "Fix - PowerShell as Administrator:"; ` +
-            `  echo "  wsl --install -d Ubuntu"; ` +
-            `  echo "  wsl --set-default Ubuntu"; ` +
-            `  echo "Then restart Windows and try again."; ` +
-            `  exit 1; ` +
-            `fi; ` +
-            // Detect package manager and install missing tools
-            // Run as current user - root needs no sudo, others use sudo if available
-            `SUDO=''; command -v sudo >/dev/null 2>&1 && [ "$(id -u)" != "0" ] && SUDO='sudo'; ` +
-            `MISSING=''; ` +
-            `for t in curl jq fzf ffmpeg parallel; do command -v "$t" >/dev/null 2>&1 || MISSING="$MISSING $t"; done; ` +
-            `if [ -n "$MISSING" ]; then ` +
-            `  echo "Missing tools:$MISSING - installing..."; ` +
-            `  if command -v apt-get >/dev/null 2>&1; then ` +
-            `    $SUDO apt-get update -qq && $SUDO apt-get install -y $MISSING 2>&1; ` +
-            `  elif command -v apk >/dev/null 2>&1; then ` +
-            `    $SUDO apk add --no-cache $MISSING 2>&1; ` +
-            `  elif command -v dnf >/dev/null 2>&1; then ` +
-            `    $SUDO dnf install -y $MISSING 2>&1; ` +
-            `  elif command -v brew >/dev/null 2>&1; then ` +
-            `    brew install $MISSING 2>&1; ` +
-            `  elif command -v pacman >/dev/null 2>&1; then ` +
-            `    $SUDO pacman -Sy --noconfirm $MISSING 2>&1; ` +
-            `  else ` +
-            `    echo "No known package manager found."; ` +
-            `    echo "Please install manually:$MISSING"; ` +
-            `    exit 1; ` +
-            `  fi; ` +
-            `fi; ` +
-            `cat > ${wslScriptPath} && chmod +x ${wslScriptPath} && ` +
-            `bash ${wslScriptPath} ${scriptArgs.join(' ')}; ` +
-            `EC=$?; rm -f ${wslScriptPath}; exit $EC`;
+
+        const args = [
+            PY_DOWNLOADER,
+            '--api-url', `http://${DOWNLOAD_API_HOST}:${API_PORT}`,
+            '--episodes', episodes,
+            '--audio', body.audio === 'dub' ? 'dub' : 'sub',
+            '--resolution', resolution,
+            '--server', srv,
+            '--subtitles', subtitles,
+            '--threads', threadsValue,
+            '--output-dir', runtimeDownloadDir,
+            '--separate-langs', sepLangsFlag,
+        ];
+        if (animeId) args.push('--anime-id', animeId);
+        else args.push('--anime-name', animeName);
 
         // Enqueue the job and start immediately if no other job is running.
         const job = {
             id,
             title: animeId || animeName,
-            episodes: sanitize(body.episodes) || '*',
-            wrapperCmd,
+            episodes,
+            command: PYTHON_EXE,
+            args,
+            env: {},
             status: 'waiting',
             process: null,
             clients: new Set(),

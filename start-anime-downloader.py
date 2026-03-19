@@ -464,6 +464,28 @@ def install_node_msi_fallback() -> None:
     msi_path.unlink(missing_ok=True)
 
 
+def install_ffmpeg_windows() -> None:
+    render_progress(22, 'Install FFmpeg (Windows)')
+    if not command_exists('winget'):
+        raise RuntimeError('winget is required to install FFmpeg automatically on Windows.')
+    run_command(
+        [
+            'winget',
+            'install',
+            '-e',
+            '--id',
+            'Gyan.FFmpeg',
+            '--accept-package-agreements',
+            '--accept-source-agreements',
+            '--silent',
+            '--disable-interactivity',
+        ],
+        timeout=1800,
+        thread='Installer thread',
+        check=False,
+    )
+
+
 def is_admin_windows() -> bool:
     try:
         return bool(ctypes.windll.shell32.IsUserAnAdmin())
@@ -697,9 +719,10 @@ def install_wsl_tools() -> None:
 
 def ensure_runtime_shell_dependencies() -> None:
     if IS_WINDOWS:
-        if not ensure_wsl_distribution():
-            raise RuntimeError('No WSL Linux distribution found. Run option 4 to install/repair it.')
-        install_wsl_tools()
+        if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
+            install_ffmpeg_windows()
+        if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
+            raise RuntimeError('ffmpeg is missing on Windows. Install/repair (option 4) failed.')
         return
 
     missing = [tool for tool in ('bash', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf') if not command_exists(tool)]
@@ -715,14 +738,10 @@ def auto_install_platform() -> None:
         else:
             install_unix_tools_non_windows()
 
-    render_progress(20, 'Check shell runtime')
+    render_progress(20, 'Check native download runtime')
     if IS_WINDOWS:
-        if not ensure_wsl_distribution():
-            install_wsl_ubuntu_windows()
-        if not ensure_wsl_distribution():
-            raise RuntimeError('WSL Linux distribution still missing. Reboot and run option 4 again.')
-        render_progress(28, 'Install tools in WSL')
-        install_wsl_tools()
+        if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
+            install_ffmpeg_windows()
     else:
         install_unix_tools_non_windows()
 
