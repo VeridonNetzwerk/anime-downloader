@@ -508,6 +508,15 @@ def install_wsl_ubuntu_windows() -> None:
         check=False,
     )
     if result.returncode != 0:
+        log('WARN', 'Installer thread', 'wsl --install with --no-launch failed. Retrying without --no-launch.')
+        result = run_command(
+            ['wsl', '--install', '-d', 'Ubuntu'],
+            timeout=1800,
+            thread='Installer thread',
+            elevated=not is_admin_windows(),
+            check=False,
+        )
+    if result.returncode != 0:
         if not vm_platform_ok:
             raise RuntimeError(
                 'Ubuntu installation via wsl.exe failed in VM fallback mode. '
