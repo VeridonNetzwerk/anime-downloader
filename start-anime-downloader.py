@@ -431,7 +431,7 @@ def is_admin_windows() -> bool:
         return False
 
 
-def ensure_wsl_ubuntu() -> bool:
+def ensure_wsl_distribution() -> bool:
     if not IS_WINDOWS:
         return True
     if not command_exists('wsl'):
@@ -439,8 +439,8 @@ def ensure_wsl_ubuntu() -> bool:
     result = subprocess.run(['wsl', '-l', '-q'], capture_output=True, text=True)
     if result.returncode != 0:
         return False
-    distros = [line.strip().lower() for line in result.stdout.splitlines() if line.strip()]
-    return any('ubuntu' in distro for distro in distros)
+    distros = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    return len(distros) > 0
 
 
 def install_wsl_ubuntu_windows() -> None:
@@ -627,8 +627,8 @@ def ensure_download_server_running() -> None:
 
 def ensure_runtime_shell_dependencies() -> None:
     if IS_WINDOWS:
-        if not ensure_wsl_ubuntu():
-            raise RuntimeError('WSL Ubuntu is missing. Run option 4 to install/repair it.')
+        if not ensure_wsl_distribution():
+            raise RuntimeError('No WSL Linux distribution found. Run option 4 to install/repair it.')
         return
 
     missing = [tool for tool in ('bash', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf') if not command_exists(tool)]
@@ -646,10 +646,10 @@ def auto_install_platform() -> None:
 
     render_progress(20, 'Check shell runtime')
     if IS_WINDOWS:
-        if not ensure_wsl_ubuntu():
+        if not ensure_wsl_distribution():
             install_wsl_ubuntu_windows()
-        if not ensure_wsl_ubuntu():
-            raise RuntimeError('Ubuntu WSL distribution still missing. Reboot and run option 4 again.')
+        if not ensure_wsl_distribution():
+            raise RuntimeError('WSL Linux distribution still missing. Reboot and run option 4 again.')
     else:
         install_unix_tools_non_windows()
 
