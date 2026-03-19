@@ -445,12 +445,12 @@ def ensure_wsl_ubuntu() -> bool:
 
 def install_wsl_ubuntu_windows() -> None:
     render_progress(22, 'Enable WSL features')
-    features = [
-        'Microsoft-Windows-Subsystem-Linux',
-        'VirtualMachinePlatform',
-    ]
     reboot_required = False
-    for feature in features:
+    wsl_feature = 'Microsoft-Windows-Subsystem-Linux'
+    vm_platform_feature = 'VirtualMachinePlatform'
+
+    def enable_feature(feature: str, *, required: bool) -> bool:
+        nonlocal reboot_required
         cmd = [
             'dism.exe',
             '/online',
@@ -469,8 +469,20 @@ def install_wsl_ubuntu_windows() -> None:
         if result.returncode == 3010:
             reboot_required = True
             log('WARN', 'Installer thread', f'{feature} enabled. Windows restart required (code 3010).')
-        elif result.returncode != 0:
+            return True
+        if result.returncode == 0:
+            return True
+        if required:
             raise RuntimeError(f'Failed to enable {feature} (exit code {result.returncode}).')
+        log(
+            'WARN',
+            'Installer thread',
+            f'Could not enable {feature} (exit code {result.returncode}). Falling back to WSL1 mode.',
+        )
+        return False
+
+    enable_feature(wsl_feature, required=True)
+    vm_platform_ok = enable_feature(vm_platform_feature, required=False)
 
     if reboot_required:
         raise RuntimeError(
@@ -479,12 +491,29 @@ def install_wsl_ubuntu_windows() -> None:
         )
 
     render_progress(25, 'Install Ubuntu distribution')
-    run_command(
+    if not vm_platform_ok:
+        run_command(
+            ['wsl', '--set-default-version', '1'],
+            timeout=120,
+            thread='Installer thread',
+            elevated=not is_admin_windows(),
+            check=False,
+        )
+
+    result = run_command(
         ['wsl', '--install', '-d', 'Ubuntu', '--no-launch'],
         timeout=1800,
         thread='Installer thread',
         elevated=not is_admin_windows(),
+        check=False,
     )
+    if result.returncode != 0:
+        if not vm_platform_ok:
+            raise RuntimeError(
+                'Ubuntu installation via wsl.exe failed in VM fallback mode. '
+                'Install Ubuntu manually from Microsoft Store, then run option 4 again.'
+            )
+        raise RuntimeError(f'Ubuntu WSL installation failed (exit code {result.returncode}).')
 
 
 def install_unix_tools_non_windows() -> None:
