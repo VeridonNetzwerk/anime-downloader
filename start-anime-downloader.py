@@ -333,8 +333,7 @@ def patch_aniworld_network_config(vpy: str) -> None:
     """Patch aniworld networking defaults for Windows VM compatibility.
 
     - Remove hardcoded DoH resolver (dns.google)
-    - Replace niquests Session with requests Session to avoid niquests-specific
-      PreparedRequest issues observed on some Windows 10 VM setups.
+        - Keep niquests Session import unchanged to preserve constructor behavior.
     """
     if not IS_WINDOWS:
         return
@@ -346,16 +345,12 @@ def patch_aniworld_network_config(vpy: str) -> None:
     except OSError:
         return
     patched = text
-    patched = patched.replace(
-        'from niquests import RequestException, Session\n',
-        'from requests import RequestException, Session\n',
-    )
     patched = patched.replace('    resolver=["doh+google://"],\n', '')
     if patched == text:
         return
     try:
         cfg_path.write_text(patched, encoding='utf-8')
-        log('WARN', 'AniWorld thread', 'Patched aniworld config: requests Session + disabled DoH resolver.')
+        log('WARN', 'AniWorld thread', 'Patched aniworld config: disabled DoH resolver.')
     except OSError:
         pass
     log('INFO', 'AniWorld thread', 'AniWorld environment ready')
