@@ -633,10 +633,41 @@ def ensure_download_server_running() -> None:
     start_process([node_command(), 'download-server.mjs'], cwd=ROOT_DIR, title='AniWatch UI server')
 
 
+def wsl_command_exists(tool: str) -> bool:
+    """Check if a command is available inside the default WSL distribution."""
+    result = subprocess.run(
+        ['wsl', '--', 'which', tool],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
+def install_wsl_tools() -> None:
+    """Install required shell tools inside WSL using apt-get."""
+    tools = ['curl', 'jq', 'fzf', 'ffmpeg', 'parallel']
+    missing = [t for t in tools if not wsl_command_exists(t)]
+    if not missing:
+        log('INFO', 'Installer thread', 'WSL tools already installed')
+        return
+    log('INFO', 'Installer thread', f'Installing missing WSL tools: {missing}')
+    render_progress(28, 'Install tools in WSL')
+    install_cmd = 'apt-get update -q -y && apt-get install -y ' + ' '.join(missing)
+    result = subprocess.run(
+        ['wsl', '--user', 'root', '--', 'bash', '-c', install_cmd],
+        timeout=1800,
+    )
+    if result.returncode != 0:
+        log('WARN', 'Installer thread', 'apt-get failed for some WSL tools; downloads may be affected')
+    else:
+        log('INFO', 'Installer thread', 'WSL tools installed successfully')
+
+
 def ensure_runtime_shell_dependencies() -> None:
     if IS_WINDOWS:
         if not ensure_wsl_distribution():
             raise RuntimeError('No WSL Linux distribution found. Run option 4 to install/repair it.')
+        install_wsl_tools()
         return
 
     missing = [tool for tool in ('bash', 'curl', 'jq', 'ffmpeg', 'parallel', 'fzf') if not command_exists(tool)]
@@ -658,6 +689,8 @@ def auto_install_platform() -> None:
             install_wsl_ubuntu_windows()
         if not ensure_wsl_distribution():
             raise RuntimeError('WSL Linux distribution still missing. Reboot and run option 4 again.')
+        render_progress(28, 'Install tools in WSL')
+        install_wsl_tools()
     else:
         install_unix_tools_non_windows()
 
@@ -687,11 +720,31 @@ def install_repair() -> None:
         INSTALL_UI_ENABLED = False
 
 
-def start_process(command: list[str], cwd: Path, title: str) -> subprocess.Popen[bytes]:
+def start_process(
+    command: list[str],
+    cwd: Path,
+    title: str,
+    env: dict | None = None,
+) -> subprocess.Popen[bytes]:
     log('INFO', 'Launcher thread', f'Starting process: {title} -> {command}')
-    proc = subprocess.Popen(command, cwd=str(cwd))
+    proc = subprocess.Popen(command, cwd=str(cwd), env=env)
     PROCESS_REGISTRY.append(proc)
     return proc
+
+
+def get_certifi_bundle() -> str | None:
+    """Return path to certifi's CA bundle from the venv, or None if unavailable."""
+    vpy = venv_python_path()
+    if not vpy.exists():
+        return None
+    result = subprocess.run(
+        [str(vpy), '-c', 'import certifi; print(certifi.where())'],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return result.stdout.strip()
+    return None
 
 
 def terminate_processes() -> None:
@@ -745,7 +798,19 @@ def ensure_aniworld_ready() -> None:
 
 def start_aniworld() -> None:
     ensure_aniworld_ready()
-    start_process([str(venv_python_path()), '-m', 'aniworld', '--web-ui', '--web-port', str(ANIWORLD_PORT)], ROOT_DIR, 'AniWorld')
+    env = os.environ.copy()
+    # On Windows VMs the system cert store may be incomplete; use certifi bundle instead.
+    cert_bundle = get_certifi_bundle()
+    if cert_bundle:
+        env['SSL_CERT_FILE'] = cert_bundle
+        env['REQUESTS_CA_BUNDLE'] = cert_bundle
+        log('INFO', 'AniWorld thread', f'Using certifi CA bundle: {cert_bundle}')
+    start_process(
+        [str(venv_python_path()), '-m', 'aniworld', '--web-ui', '--web-port', str(ANIWORLD_PORT)],
+        ROOT_DIR,
+        'AniWorld',
+        env=env,
+    )
     time.sleep(2)
     open_url(f'http://localhost:{ANIWORLD_PORT}')
     wait_for_shutdown([f'http://localhost:{ANIWORLD_PORT}'])
@@ -766,7 +831,17 @@ def start_both() -> None:
     ensure_node_present()
     ensure_runtime_shell_dependencies()
 
-    start_process([str(venv_python_path()), '-m', 'aniworld', '--web-ui', '--web-port', str(ANIWORLD_PORT)], ROOT_DIR, 'AniWorld')
+    env = os.environ.copy()
+    cert_bundle = get_certifi_bundle()
+    if cert_bundle:
+        env['SSL_CERT_FILE'] = cert_bundle
+        env['REQUESTS_CA_BUNDLE'] = cert_bundle
+    start_process(
+        [str(venv_python_path()), '-m', 'aniworld', '--web-ui', '--web-port', str(ANIWORLD_PORT)],
+        ROOT_DIR,
+        'AniWorld',
+        env=env,
+    )
     ensure_api_running()
     ensure_download_server_running()
     time.sleep(2)
