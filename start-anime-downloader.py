@@ -389,6 +389,19 @@ def refresh_node_path() -> None:
         log('DEBUG', 'Installer thread', f'PATH extended with: {additions}')
 
 
+def refresh_ffmpeg_path() -> None:
+    candidates = [
+        str((ROOT_DIR / 'tools' / 'ffmpeg' / 'bin').resolve()),
+        r'C:\Program Files\ffmpeg\bin',
+    ]
+    current = os.environ.get('PATH', '')
+    lower = current.lower()
+    additions = [p for p in candidates if Path(p).exists() and p.lower() not in lower]
+    if additions:
+        os.environ['PATH'] = os.pathsep.join(additions) + os.pathsep + current
+        log('DEBUG', 'Installer thread', f'PATH extended with FFmpeg locations: {additions}')
+
+
 def install_node_windows() -> None:
     log('INFO', 'Installer thread', 'Node.js missing. Starting automatic installation')
     render_progress(10, 'Install Node.js LTS automatically')
@@ -466,24 +479,66 @@ def install_node_msi_fallback() -> None:
 
 def install_ffmpeg_windows() -> None:
     render_progress(22, 'Install FFmpeg (Windows)')
-    if not command_exists('winget'):
-        raise RuntimeError('winget is required to install FFmpeg automatically on Windows.')
-    run_command(
-        [
-            'winget',
-            'install',
-            '-e',
-            '--id',
-            'Gyan.FFmpeg',
-            '--accept-package-agreements',
-            '--accept-source-agreements',
-            '--silent',
-            '--disable-interactivity',
-        ],
-        timeout=1800,
-        thread='Installer thread',
-        check=False,
+    if command_exists('winget'):
+        run_command(
+            [
+                'winget',
+                'install',
+                '-e',
+                '--id',
+                'Gyan.FFmpeg',
+                '--accept-package-agreements',
+                '--accept-source-agreements',
+                '--silent',
+                '--disable-interactivity',
+            ],
+            timeout=1800,
+            thread='Installer thread',
+            check=False,
+        )
+        refresh_ffmpeg_path()
+        if command_exists('ffmpeg.exe') or command_exists('ffmpeg'):
+            return
+
+    # Fallback for systems without winget: install portable FFmpeg into project tools folder.
+    render_progress(24, 'Install FFmpeg portable fallback')
+    tools_root = ROOT_DIR / 'tools' / 'ffmpeg'
+    zip_path = Path(os.environ.get('TEMP', str(ROOT_DIR))) / 'aniwatch-ffmpeg.zip'
+    ps_download = (
+        "$ProgressPreference='SilentlyContinue'; "
+        "$wc = New-Object System.Net.WebClient; "
+        "$wc.DownloadFile('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip', $env:FFMPEG_ZIP)"
     )
+    env = os.environ.copy()
+    env['FFMPEG_ZIP'] = str(zip_path)
+    result = subprocess.run(['powershell', '-NoProfile', '-Command', ps_download], env=env, timeout=600)
+    if result.returncode != 0:
+        raise RuntimeError('Could not download FFmpeg portable package.')
+
+    extracted = tools_root / '_extract'
+    shutil.rmtree(extracted, ignore_errors=True)
+    extracted.mkdir(parents=True, exist_ok=True)
+    shutil.unpack_archive(str(zip_path), str(extracted))
+    zip_path.unlink(missing_ok=True)
+
+    found = next(extracted.rglob('ffmpeg.exe'), None)
+    if not found:
+        raise RuntimeError('FFmpeg portable package did not contain ffmpeg.exe')
+
+    target_bin = tools_root / 'bin'
+    shutil.rmtree(target_bin, ignore_errors=True)
+    target_bin.mkdir(parents=True, exist_ok=True)
+    for item in found.parent.iterdir():
+        dest = target_bin / item.name
+        if item.is_dir():
+            shutil.copytree(item, dest, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, dest)
+    shutil.rmtree(extracted, ignore_errors=True)
+
+    refresh_ffmpeg_path()
+    if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
+        raise RuntimeError('FFmpeg installation failed (winget and portable fallback).')
 
 
 def is_admin_windows() -> bool:
@@ -595,6 +650,7 @@ def ensure_download_server_running() -> None:
 
 def ensure_runtime_shell_dependencies() -> None:
     if IS_WINDOWS:
+        refresh_ffmpeg_path()
         if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
             install_ffmpeg_windows()
         if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
@@ -616,6 +672,7 @@ def auto_install_platform() -> None:
 
     render_progress(20, 'Check native download runtime')
     if IS_WINDOWS:
+        refresh_ffmpeg_path()
         if not (command_exists('ffmpeg.exe') or command_exists('ffmpeg')):
             install_ffmpeg_windows()
     else:
