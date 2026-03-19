@@ -17,7 +17,7 @@ The launcher handles automatic dependency installation, repair, and lifecycle ma
 | Page | Description |
 |------|-------------|
 | [Home](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Home) | Overview and navigation |
-| [Installation](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation) | Step-by-step first-time setup |
+| [Installation](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation) | Step-by-step first-time setup, supported and tested OS |
 | [Usage Guide](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Usage-Guide) | Menu reference, ports, log files |
 | [How It Works](https://github.com/VeridonNetzwerk/anime-downloader/wiki/How-It-Works) | Architecture and component overview |
 | [Troubleshooting](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Troubleshooting) | Common errors and fixes |

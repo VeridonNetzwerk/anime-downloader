@@ -14,6 +14,19 @@
 | Linux | Yes | Option 4 installs dependencies via apt, dnf, or pacman |
 | macOS | Yes | Option 4 installs dependencies via Homebrew |
 
+## Tested Configurations
+
+| OS | Version | Architecture | Python | Status | Notes |
+|----|---------|--------------|--------|--------|-------|
+| Windows | 10 (22H2) | x64 | 3.13.x | ✅ Working | Tested on fresh VM; FFmpeg portable fallback active |
+| Windows | 11 (24H2) | x64 | 3.13.x | ✅ Working | Tested on development machine |
+| Linux | Ubuntu 22.04 LTS | x64 | 3.10+ | ⚠️ Untested | Expected to work; apt install path implemented |
+| Linux | Fedora 39+ | x64 | 3.10+ | ⚠️ Untested | Expected to work; dnf install path implemented |
+| Linux | Arch Linux | x64 | 3.10+ | ⚠️ Untested | Expected to work; pacman install path implemented |
+| macOS | 13 Ventura+ | x64 / ARM | 3.10+ | ⚠️ Untested | Expected to work; Homebrew install path implemented |
+
+> **Legend:** ✅ Confirmed working — ⚠️ Implemented but not yet tested on real hardware
+
 ## Launcher
 
 Start the project with:
