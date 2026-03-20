@@ -388,7 +388,45 @@ def refresh_ffmpeg_path() -> None:
     candidates = [
         str((ROOT_DIR / 'tools' / 'ffmpeg' / 'bin').resolve()),
         r'C:\Program Files\ffmpeg\bin',
+        r'C:\Program Files (x86)\ffmpeg\bin',
     ]
+
+    # Winget writes new entries to the registry PATH, not to the current process
+    # environment. Re-read machine + user PATH from the registry so that a
+    # winget-installed FFmpeg is visible without restarting the process.
+    try:
+        ps = subprocess.run(
+            [
+                'powershell', '-NoProfile', '-Command',
+                '[Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + '
+                '[Environment]::GetEnvironmentVariable("PATH","User")',
+            ],
+            capture_output=True, text=True, timeout=15,
+        )
+        if ps.returncode == 0 and ps.stdout.strip():
+            system_path = ps.stdout.strip()
+            current_parts = os.environ.get('PATH', '').split(os.pathsep)
+            extra_parts = [p for p in system_path.split(';') if p and p not in current_parts]
+            if extra_parts:
+                os.environ['PATH'] = os.pathsep.join(current_parts + extra_parts)
+    except Exception:
+        pass
+
+    # Also probe the WinGet packages directory directly — covers the case where
+    # the registry PATH update has not yet been flushed to all processes.
+    localappdata = os.environ.get('LOCALAPPDATA', '')
+    if localappdata:
+        winget_pkgs = Path(localappdata) / 'Microsoft' / 'WinGet' / 'Packages'
+        if winget_pkgs.exists():
+            try:
+                for pkg_dir in winget_pkgs.iterdir():
+                    if 'ffmpeg' in pkg_dir.name.lower() or 'gyan' in pkg_dir.name.lower():
+                        for ffmpeg_exe in pkg_dir.rglob('ffmpeg.exe'):
+                            candidates.append(str(ffmpeg_exe.parent))
+                            break
+            except OSError:
+                pass
+
     current = os.environ.get('PATH', '')
     lower = current.lower()
     additions = [p for p in candidates if Path(p).exists() and p.lower() not in lower]
