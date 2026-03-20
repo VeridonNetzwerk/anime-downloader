@@ -11,7 +11,18 @@ Fix:
 3. Let it recreate `.venv` with Python 3.13.
 4. Retry option `1` or `3`.
 
-## 2) npm install fails in aniwatch-api
+## 2) AniWorld fails on Ubuntu/Debian with ensurepip or python3-venv errors
+
+Cause:
+- The system Python was installed without venv support.
+
+Fix:
+1. Run launcher option `4` once.
+2. Retry option `1` or `3`.
+3. If it still fails, install the missing package manually, for example `sudo apt install python3-venv`.
+4. On version-specific Python installs, you may need `sudo apt install python3.12-venv` or the matching Python version.
+
+## 3) npm install fails in aniwatch-api
 
 The launcher has staged recovery:
 - normal install
@@ -22,7 +33,7 @@ The launcher has staged recovery:
 Fix:
 - Run option `4` and inspect `latest.log` for `ERROR_CODE=` entries.
 
-## 3) FFmpeg not found (Windows)
+## 4) FFmpeg not found (Windows)
 
 Fix:
 1. Run option `4`.
@@ -34,14 +45,14 @@ Note:
 - On Linux/macOS, option `4` installs FFmpeg via native package managers.
 - A restart should only be necessary if Windows delays newly installed PATH entries for the current shell session.
 
-## 4) API not available on port 4000
+## 5) API not available on port 4000
 
 Fix:
 - Use option `2` or `3` to restart the API.
 - Check if another process is using port 4000.
 - Check `latest.log` for build or startup errors.
 
-## 5) Browser opens but UI is blank
+## 6) Browser opens but UI is blank
 
 Fix:
 - Ensure `aniwatch-ui/index.html` exists.

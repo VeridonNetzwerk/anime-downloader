@@ -227,6 +227,44 @@ def pick_windows_python_bootstrap() -> list[str] | None:
     return None
 
 
+def ensure_non_windows_python_venv_support(bootstrap: list[str]) -> None:
+    if IS_WINDOWS:
+        return
+
+    probe = subprocess.run(
+        bootstrap + ['-m', 'ensurepip', '--version'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    if probe.returncode == 0:
+        return
+
+    if IS_LINUX and command_exists('apt-get'):
+        render_progress(40, 'Install Python venv support')
+        run_command(['sudo', 'apt-get', 'update'], timeout=900, thread='AniWorld thread', check=False)
+
+        version_pkg = f'python{sys.version_info.major}.{sys.version_info.minor}-venv'
+        run_command(['sudo', 'apt-get', 'install', '-y', version_pkg], timeout=900, thread='AniWorld thread', check=False)
+        run_command(['sudo', 'apt-get', 'install', '-y', 'python3-venv'], timeout=900, thread='AniWorld thread', check=False)
+
+        retry = subprocess.run(
+            bootstrap + ['-m', 'ensurepip', '--version'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if retry.returncode == 0:
+            log('INFO', 'AniWorld thread', 'Installed Python venv support successfully')
+            return
+
+        raise RuntimeError(
+            f'Python venv support is missing. Install {version_pkg} or python3-venv and retry.'
+        )
+
+    if IS_LINUX:
+        log('WARN', 'AniWorld thread', 'ensurepip is unavailable on this Linux system. Install the distro-specific Python venv package.')
+        raise RuntimeError('Python venv support is missing. Install the distro-specific python venv package and retry.')
+
+
 def create_venv_with_bootstrap() -> None:
     if venv_python_path().exists():
         return
@@ -240,6 +278,8 @@ def create_venv_with_bootstrap() -> None:
                 log_error_code('AniWorld thread', 'PYTHON_NOT_FOUND', 'No compatible Python interpreter available')
                 raise RuntimeError('No Python interpreter found. Install Python 3.13.x and retry.')
             bootstrap = picked
+    else:
+        ensure_non_windows_python_venv_support(bootstrap)
 
     log('INFO', 'AniWorld thread', f'Creating Python venv in {VENV_DIR}')
     run_command(bootstrap + ['-m', 'venv', str(VENV_DIR)], timeout=600, thread='AniWorld thread')
@@ -624,9 +664,15 @@ def install_unix_tools_non_windows() -> None:
         if command_exists('apt-get'):
             run_command(['sudo', 'apt-get', 'update'], timeout=900, thread='Installer thread')
             run_command(
-                ['sudo', 'apt-get', 'install', '-y', 'nodejs', 'npm', 'ffmpeg'],
+                ['sudo', 'apt-get', 'install', '-y', 'nodejs', 'npm', 'ffmpeg', 'python3-venv'],
                 timeout=1800,
                 thread='Installer thread',
+            )
+            run_command(
+                ['sudo', 'apt-get', 'install', '-y', f'python{sys.version_info.major}.{sys.version_info.minor}-venv'],
+                timeout=900,
+                thread='Installer thread',
+                check=False,
             )
             run_command(
                 ['sudo', 'apt-get', 'install', '-y', 'curl', 'jq', 'parallel', 'fzf'],
