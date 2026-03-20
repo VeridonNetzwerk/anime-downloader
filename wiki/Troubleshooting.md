@@ -26,11 +26,13 @@ Fix:
 
 Fix:
 1. Run option `4`.
-2. Restart terminal/launcher so updated PATH is loaded.
-3. Run option `4` again if needed.
+2. If FFmpeg or Node.js was just installed and is still not detected, close the launcher and terminal once.
+3. Start the launcher again so Windows can reload the updated PATH entries.
+4. Run option `4` again if needed.
 
 Note:
 - On Linux/macOS, option `4` installs FFmpeg via native package managers.
+- A restart should only be necessary if Windows delays newly installed PATH entries for the current shell session.
 
 ## 4) API not available on port 4000
 

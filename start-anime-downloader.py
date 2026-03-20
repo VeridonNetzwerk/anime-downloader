@@ -376,6 +376,40 @@ def refresh_node_path() -> None:
         r'C:\Program Files (x86)\nodejs',
         os.path.expandvars(r'%APPDATA%\nvm\default'),
     ]
+
+    try:
+        ps = subprocess.run(
+            [
+                'powershell', '-NoProfile', '-Command',
+                '[Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + '
+                '[Environment]::GetEnvironmentVariable("PATH","User")',
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if ps.returncode == 0 and ps.stdout.strip():
+            system_path = ps.stdout.strip()
+            current_parts = os.environ.get('PATH', '').split(os.pathsep)
+            extra_parts = [p for p in system_path.split(';') if p and p not in current_parts]
+            if extra_parts:
+                os.environ['PATH'] = os.pathsep.join(current_parts + extra_parts)
+    except Exception:
+        pass
+
+    localappdata = os.environ.get('LOCALAPPDATA', '')
+    if localappdata:
+        winget_pkgs = Path(localappdata) / 'Microsoft' / 'WinGet' / 'Packages'
+        if winget_pkgs.exists():
+            try:
+                for pkg_dir in winget_pkgs.iterdir():
+                    if 'nodejs' in pkg_dir.name.lower() or 'openjs' in pkg_dir.name.lower():
+                        for node_exe in pkg_dir.rglob('node.exe'):
+                            candidates.append(str(node_exe.parent))
+                            break
+            except OSError:
+                pass
+
     current = os.environ.get('PATH', '')
     lower = current.lower()
     additions = [p for p in candidates if Path(p).exists() and p.lower() not in lower]
@@ -457,6 +491,10 @@ def install_node_windows() -> None:
                 thread='Installer thread',
             )
         except subprocess.CalledProcessError:
+            refresh_node_path()
+            if command_exists(node_command()) and command_exists(npm_command()):
+                log('INFO', 'Installer thread', 'Node.js became available after winget attempt; skipping MSI fallback.')
+                return
             log('WARN', 'Installer thread', 'winget install failed. Using MSI fallback.')
             install_node_msi_fallback()
     else:
@@ -861,7 +899,6 @@ def start_aniworld() -> None:
         env=env,
     )
     time.sleep(2)
-    open_url(f'http://localhost:{ANIWORLD_PORT}')
     wait_for_shutdown([f'http://localhost:{ANIWORLD_PORT}'])
 
 
@@ -895,8 +932,6 @@ def start_both() -> None:
     ensure_download_server_running()
     time.sleep(2)
 
-    open_url(f'http://localhost:{ANIWORLD_PORT}')
-    time.sleep(1)
     open_url(f'http://localhost:{ANIWATCH_UI_PORT}')
     wait_for_shutdown([f'http://localhost:{ANIWORLD_PORT}', f'http://localhost:{ANIWATCH_UI_PORT}'])
 
