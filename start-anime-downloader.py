@@ -398,6 +398,7 @@ def patch_aniworld_network_config(vpy: str) -> None:
 
 def ensure_node_present() -> None:
     if command_exists(node_command()) and command_exists(npm_command()):
+        ensure_supported_node_runtime()
         log('INFO', 'Installer thread', 'Node.js and npm are available')
         return
 
@@ -407,6 +408,55 @@ def ensure_node_present() -> None:
 
     log_error_code('Installer thread', 'NODE_MISSING', 'Node.js not found')
     raise RuntimeError('Node.js is missing. Run option 4 or install Node.js 24.x LTS manually.')
+
+
+def get_node_version_tuple() -> tuple[int, int, int] | None:
+    if not command_exists(node_command()):
+        return None
+    try:
+        result = subprocess.run([node_command(), '--version'], capture_output=True, text=True, timeout=10)
+    except Exception:
+        return None
+    if result.returncode != 0:
+        return None
+    raw = (result.stdout or result.stderr).strip().lower().lstrip('v')
+    parts = raw.split('.')
+    if len(parts) < 2:
+        return None
+    try:
+        major = int(parts[0])
+        minor = int(parts[1]) if len(parts) > 1 else 0
+        patch = int(parts[2]) if len(parts) > 2 else 0
+    except ValueError:
+        return None
+    return (major, minor, patch)
+
+
+def install_modern_node_apt() -> None:
+    log('INFO', 'Installer thread', 'Detected old Node.js runtime. Installing Node.js 20.x for compatibility.')
+    run_command(['sudo', 'apt-get', 'install', '-y', 'ca-certificates', 'curl', 'gnupg'], timeout=900, thread='Installer thread', check=False)
+    run_command('curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -', timeout=1200, thread='Installer thread')
+    run_command(['sudo', 'apt-get', 'install', '-y', 'nodejs'], timeout=1200, thread='Installer thread')
+
+
+def ensure_supported_node_runtime() -> None:
+    version = get_node_version_tuple()
+    if not version:
+        return
+    major, minor, patch = version
+    if major >= 18:
+        return
+
+    if IS_LINUX and command_exists('apt-get'):
+        install_modern_node_apt()
+        version = get_node_version_tuple()
+        if version and version[0] >= 18:
+            log('INFO', 'Installer thread', f'Node.js upgraded successfully to v{version[0]}.{version[1]}.{version[2]}')
+            return
+
+    raise RuntimeError(
+        f'Node.js v{major}.{minor}.{patch} is too old. Install Node.js 20+ and rerun option 4.'
+    )
 
 
 def refresh_node_path() -> None:
@@ -815,6 +865,7 @@ def auto_install_platform() -> None:
     if IS_WINDOWS:
         if not (command_exists(node_command()) and command_exists(npm_command())):
             install_node_windows()
+        ensure_supported_node_runtime()
 
         render_progress(20, 'Check native download runtime')
         refresh_ffmpeg_path()
@@ -824,6 +875,7 @@ def auto_install_platform() -> None:
 
     # On non-Windows systems, package installation also covers ffmpeg/runtime.
     install_unix_tools_non_windows()
+    ensure_supported_node_runtime()
 
 
 def install_repair() -> None:

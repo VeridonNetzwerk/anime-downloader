@@ -33,7 +33,17 @@ The launcher has staged recovery:
 Fix:
 - Run option `4` and inspect `latest.log` for `ERROR_CODE=` entries.
 
-## 4) FFmpeg not found (Windows)
+## 4) Debian 11 / Ubuntu 22: npm EBADENGINE or `Unexpected token '?'`
+
+Cause:
+- Node.js is too old (commonly v12 from default distro repositories).
+
+Fix:
+1. Run launcher option `4` again (it now upgrades apt-based systems to Node.js 20 when needed).
+2. If the system still reports an old Node version, run `node --version` and install Node.js 20+ manually.
+3. Retry option `4`.
+
+## 5) FFmpeg not found (Windows)
 
 Fix:
 1. Run option `4`.
@@ -45,14 +55,14 @@ Note:
 - On Linux/macOS, option `4` installs FFmpeg via native package managers.
 - A restart should only be necessary if Windows delays newly installed PATH entries for the current shell session.
 
-## 5) API not available on port 4000
+## 6) API not available on port 4000
 
 Fix:
 - Use option `2` or `3` to restart the API.
 - Check if another process is using port 4000.
 - Check `latest.log` for build or startup errors.
 
-## 6) Browser opens but UI is blank
+## 7) Browser opens but UI is blank
 
 Fix:
 - Ensure `aniwatch-ui/index.html` exists.
