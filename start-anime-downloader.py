@@ -12,12 +12,39 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 import webbrowser
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+DEPENDENCY_ROOT_ENV = 'ANIME_DOWNLOADER_DEPS_DIR'
+WINDOWS_DEPENDENCY_ROOT = Path(r'C:\anime-downloader  dependencies')
+DEFAULT_NON_WINDOWS_DEPENDENCY_ROOT = Path.home() / '.anime-downloader-dependencies'
+
+ANIWATCH_API_REPO = 'https://github.com/ghoshRitesh12/aniwatch-api.git'
+ANIWATCH_ASSETS_BASE_RAW = (
+    'https://raw.githubusercontent.com/VeridonNetzwerk/assets/main/'
+    'Aniworld%20Downloader/downloaders/aniwatch'
+)
+
+
+def resolve_dependency_root() -> Path:
+    if platform.system().lower() == 'windows':
+        return WINDOWS_DEPENDENCY_ROOT
+
+    override = os.environ.get(DEPENDENCY_ROOT_ENV, '').strip()
+    if override:
+        return Path(override).expanduser().resolve()
+    return DEFAULT_NON_WINDOWS_DEPENDENCY_ROOT
+
+
+ROOT_DIR = resolve_dependency_root()
+ROOT_DIR.mkdir(parents=True, exist_ok=True)
 API_DIR = ROOT_DIR / 'aniwatch-api'
+UI_DIR = ROOT_DIR / 'aniwatch-ui'
 VENV_DIR = ROOT_DIR / '.venv'
 LOG_FILE = ROOT_DIR / 'latest.log'
 
@@ -34,6 +61,22 @@ IS_MACOS = OS_NAME == 'darwin'
 
 PROCESS_REGISTRY: list[subprocess.Popen[bytes]] = []
 INSTALL_UI_ENABLED = False
+
+
+def ensure_standalone_runtime_root() -> None:
+    try:
+        os.chdir(ROOT_DIR)
+    except OSError as exc:
+        raise RuntimeError(f'Could not switch to standalone dependency root: {ROOT_DIR} ({exc})') from exc
+
+    target_launcher = ROOT_DIR / Path(__file__).name
+    source_launcher = Path(__file__).resolve()
+    if source_launcher != target_launcher:
+        try:
+            shutil.copy2(source_launcher, target_launcher)
+            log('INFO', 'Launcher thread', f'Updated standalone launcher copy at {target_launcher}')
+        except OSError as exc:
+            log('WARN', 'Launcher thread', f'Could not copy launcher into standalone folder: {exc}')
 
 
 def timestamp() -> str:
@@ -155,6 +198,70 @@ def run_command(
     if check and result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, command)
     return result
+
+
+def download_file(url: str, target: Path, *, thread: str = 'Installer thread', timeout: int = 120) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    req = urllib.request.Request(url, headers={'User-Agent': 'anime-downloader-installer/1.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            data = response.read()
+        target.write_bytes(data)
+    except (urllib.error.URLError, OSError) as exc:
+        raise RuntimeError(f'Failed to download {url}: {exc}') from exc
+    log('INFO', thread, f'Downloaded {target.name}')
+
+
+def install_aniwatch_api_sources() -> None:
+    thread = 'AniWatch API thread'
+    render_progress(68, 'Download AniWatch API source code')
+
+    if API_DIR.exists() and (API_DIR / 'package.json').exists():
+        log('INFO', thread, f'AniWatch API source already exists at {API_DIR}')
+        return
+
+    if API_DIR.exists() and not (API_DIR / '.git').exists():
+        shutil.rmtree(API_DIR, ignore_errors=True)
+
+    if command_exists('git'):
+        if API_DIR.exists() and (API_DIR / '.git').exists():
+            run_command(['git', '-C', str(API_DIR), 'fetch', '--depth', '1', 'origin', 'main'], timeout=900, thread=thread, check=False)
+            run_command(['git', '-C', str(API_DIR), 'reset', '--hard', 'origin/main'], timeout=900, thread=thread, check=False)
+        else:
+            run_command(['git', 'clone', '--depth', '1', '--branch', 'main', ANIWATCH_API_REPO, str(API_DIR)], timeout=1800, thread=thread)
+        return
+
+    archive = ROOT_DIR / 'aniwatch-api-main.zip'
+    extract_root = ROOT_DIR / '_tmp_aniwatch_api'
+    download_file('https://codeload.github.com/ghoshRitesh12/aniwatch-api/zip/refs/heads/main', archive, thread=thread, timeout=180)
+    shutil.rmtree(extract_root, ignore_errors=True)
+    extract_root.mkdir(parents=True, exist_ok=True)
+    shutil.unpack_archive(str(archive), str(extract_root))
+    archive.unlink(missing_ok=True)
+    extracted = extract_root / 'aniwatch-api-main'
+    if not extracted.exists():
+        raise RuntimeError('Could not extract AniWatch API source archive.')
+    if API_DIR.exists():
+        shutil.rmtree(API_DIR, ignore_errors=True)
+    shutil.move(str(extracted), str(API_DIR))
+    shutil.rmtree(extract_root, ignore_errors=True)
+
+
+def install_aniwatch_runtime_files() -> None:
+    thread = 'AniWatch UI thread'
+    render_progress(70, 'Download AniWatch downloader files')
+    required_files = {
+        ROOT_DIR / 'download-server.mjs': f'{ANIWATCH_ASSETS_BASE_RAW}/download-server.mjs',
+        ROOT_DIR / 'aniwatch-dl.py': f'{ANIWATCH_ASSETS_BASE_RAW}/aniwatch-dl.py',
+        UI_DIR / 'index.html': f'{ANIWATCH_ASSETS_BASE_RAW}/aniwatch-ui/index.html',
+    }
+    for target, url in required_files.items():
+        download_file(url, target, thread=thread, timeout=120)
+
+
+def ensure_aniwatch_sources() -> None:
+    install_aniwatch_api_sources()
+    install_aniwatch_runtime_files()
 
 
 def run_windows_elevated(command: str, *, timeout: int, thread: str) -> subprocess.CompletedProcess[bytes]:
@@ -817,6 +924,8 @@ def install_or_build_aniwatch_api() -> None:
 
 
 def ensure_api_runtime_artifacts() -> None:
+    if not (API_DIR / 'package.json').exists():
+        raise RuntimeError('AniWatch API source is missing. Run option 4 to download and install it.')
     server_js = API_DIR / 'dist' / 'src' / 'server.js'
     node_modules = API_DIR / 'node_modules'
     if node_modules.exists() and server_js.exists():
@@ -840,6 +949,10 @@ def ensure_api_running() -> None:
 
 
 def ensure_download_server_running() -> None:
+    server_file = ROOT_DIR / 'download-server.mjs'
+    ui_index = UI_DIR / 'index.html'
+    if not server_file.exists() or not ui_index.exists():
+        raise RuntimeError('AniWatch UI runtime files are missing. Run option 4 to download them.')
     if is_port_open(ANIWATCH_UI_PORT):
         log('INFO', 'AniWatch UI thread', 'AniWatch UI server is already running on port 4001')
         return
@@ -890,6 +1003,9 @@ def install_repair() -> None:
 
         render_progress(30, 'Check AniWorld environment')
         ensure_aniworld()
+
+        render_progress(66, 'Download AniWatch components')
+        ensure_aniwatch_sources()
 
         render_progress(72, 'Install AniWatch API')
         install_or_build_aniwatch_api()
@@ -1049,9 +1165,13 @@ def validate_platform_support() -> None:
 
 def main() -> int:
     validate_platform_support()
+    ensure_standalone_runtime_root()
     reset_log()
     log('INFO', 'Launcher thread', f'Platform detected: {platform.system()} {platform.release()}')
     log('INFO', 'Launcher thread', f'Python version: {platform.python_version()}')
+    log('INFO', 'Launcher thread', f'Standalone dependency root: {ROOT_DIR}')
+    if not IS_WINDOWS:
+        log('INFO', 'Launcher thread', f'You can override the dependency root with {DEPENDENCY_ROOT_ENV}.')
 
     atexit.register(terminate_processes)
     signal.signal(signal.SIGINT, handle_signal)

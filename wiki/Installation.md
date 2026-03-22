@@ -64,6 +64,11 @@ The launcher menu options are:
 
 Option `4` installs or repairs dependencies based on your operating system.
 
+It also downloads AniWatch components automatically:
+
+- AniWatch API source from `https://github.com/ghoshRitesh12/aniwatch-api`
+- AniWatch downloader runtime files from `https://github.com/VeridonNetzwerk/assets/tree/main/Aniworld%20Downloader/downloaders/aniwatch`
+
 | Component | Version | Purpose | Auto-installed |
 |-----------|---------|---------|----------------|
 | Node.js | 24.x (LTS) | AniWatch API & download server | ✓ |
@@ -81,19 +86,25 @@ Option `4` installs or repairs dependencies based on your operating system.
 - Installs/repairs Node.js (winget, then MSI fallback)
 - Installs/repairs FFmpeg for native video downloading
 - Rebuilds Python venv for AniWorld (prefers Python 3.13)
+- Downloads AniWatch API + AniWatch runtime files
 - Runs npm install/build recovery for aniwatch-api
+- Uses standalone dependency root: `C:\anime-downloader  dependencies`
 
 ### Linux
 
 - Installs/repairs dependencies via apt, dnf, pacman, or zypper
 - Rebuilds Python venv for AniWorld
+- Downloads AniWatch API + AniWatch runtime files
 - Runs npm install/build recovery for aniwatch-api
+- Uses standalone dependency root: `~/.anime-downloader-dependencies` (override with `ANIME_DOWNLOADER_DEPS_DIR`)
 
 ### macOS
 
 - Installs/repairs dependencies via Homebrew
 - Rebuilds Python venv for AniWorld
+- Downloads AniWatch API + AniWatch runtime files
 - Runs npm install/build recovery for aniwatch-api
+- Uses standalone dependency root: `~/.anime-downloader-dependencies` (override with `ANIME_DOWNLOADER_DEPS_DIR`)
 
 ---
 

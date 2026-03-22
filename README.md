@@ -56,6 +56,7 @@ python start-anime-downloader.py
 ```
 
 4. On first run, select **`4` → Install / Repair**. The script detects your OS and runs the matching setup flow automatically.
+  - Option `4` now downloads AniWatch API (`ghoshRitesh12/aniwatch-api`) and the AniWatch downloader runtime files (`download-server.mjs`, `aniwatch-dl.py`, `aniwatch-ui/index.html`) automatically.
 5. Once done, pick your mode:
 
 | Option | Action | URL |
@@ -67,6 +68,16 @@ python start-anime-downloader.py
 | `5` | Exit | — |
 
 If you have problems with the installation, feel free to check out the **[Installation Page](https://github.com/VeridonNetzwerk/anime-downloader/wiki/Installation)** in the Github Wiki.
+
+## 📦 Standalone Dependency Folder
+
+The Python launcher is now designed to run with a standalone dependency folder.
+
+- Windows: fixed path `C:\anime-downloader  dependencies`
+- Linux/macOS: default `~/.anime-downloader-dependencies`
+- Linux/macOS override: set environment variable `ANIME_DOWNLOADER_DEPS_DIR`
+
+Option `4` creates this folder (if missing), downloads required AniWatch sources, installs dependencies there, and runs services from this folder.
 
 ## ⚙️ AniWatch Settings
 

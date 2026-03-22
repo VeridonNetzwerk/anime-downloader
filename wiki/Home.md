@@ -12,6 +12,8 @@ This project is a unified launcher and orchestration layer that brings together 
 
 The launcher handles automatic dependency installation, repair, and lifecycle management for all three components. It provides a simple menu-driven interface to start services independently or together, with built-in recovery mechanisms and structured logging.
 
+As of the standalone launcher flow, option `4` downloads AniWatch API and AniWatch runtime files automatically into a dedicated dependency folder before installing/building.
+
 ## Navigation
 
 | Page | Description |
