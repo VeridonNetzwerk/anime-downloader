@@ -14,20 +14,20 @@
 
 | OS          | Version           | Architecture      | Python       | Status           | Release      |
 | ----------- | ----------------- | ----------------- | ------------ | ---------------- | ------------ |
-| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13         | ✅ Working       | v1.3         |
-| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13         | ✅ Working       | v1.3         |
+| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13         | ✅ Working       | v1.3.0       |
+| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13         | ✅ Working       | v1.3.0       |
 | Windows     | 8.1               | x86 / x64         | ≤3.10        | ⚠️ Untested      | -            |
 | Windows     | 8                 | x86 / x64         | ≤3.9         | ⚠️ Untested      | -            |
 | Windows     | 7 (SP1)           | x86 / x64         | ≤3.8         | ❌ Not Supported | -            |
 | Windows     | XP (SP3)          | x86               | ≤3.4         | ❌ Not Supported | -            |
-| Ubuntu      | 22.04 LTS         | x64 / ARM64       | 3.10.12      | ✅ Working       | -            |
-| Ubuntu      | 24.04 LTS         | x64 / ARM64       | 3.12.2       | ✅ Working       | -            |
-| Debian      | 11 (Bullseye)     | x64 / ARM64       | 3.9.2        | ✅ Working       | -            |
-| Debian      | 12 (Bookworm)     | x64 / ARM64       | 3.11.2       | ✅ Working       | -            |
-| Debian      | 13 (Trixie)       | x64 / ARM64       | 3.12.3       | ✅ Working       | -            |
-| Fedora      | 39+               | x64 / ARM64       | 3.12.0       | ✅ Working       | -            |
+| Ubuntu      | 22.04 LTS         | x64 / ARM64       | 3.10.12      | ✅ Working       | v1.3.0       |
+| Ubuntu      | 24.04 LTS         | x64 / ARM64       | 3.12.2       | ✅ Working       | v1.3.0       |
+| Debian      | 11 (Bullseye)     | x64 / ARM64       | 3.9.2        | ✅ Working       | v1.3.0       |
+| Debian      | 12 (Bookworm)     | x64 / ARM64       | 3.11.2       | ✅ Working       | v1.3.0       |
+| Debian      | 13 (Trixie)       | x64 / ARM64       | 3.12.3       | ✅ Working       | v1.3.0       |
+| Fedora      | 39+               | x64 / ARM64       | 3.12.0       | ✅ Working       | v1.3.0       |
 | Arch Linux  | 2025.01.01+       | x64               | 3.12+        | ⚠️ Untested      | -            |
-| Linux Mint  | 22                | x64               | 3.12.3       | ✅ Working       | -            |
+| Linux Mint  | 22                | x64               | 3.12.3       | ✅ Working       | v1.3.0       |
 | openSUSE    | Leap / Tumbleweed | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
 | macOS       | 13 Ventura        | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
 | macOS       | 14 Sonoma         | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
