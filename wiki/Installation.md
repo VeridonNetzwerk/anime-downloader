@@ -38,7 +38,13 @@
 | FreeBSD     | 13 / 14           | x64 / ARM64       | 3.9+         | ❌ Not Supported | -            |
 | OpenBSD     | 7.x               | x64 / ARM64       | 3.9+         | ❌ Not Supported | -            |
 
-> **Legend:** ✅ Confirmed working — ⚠️ Implemented but not tested - ❌ Not Implemented
+> **Legend:** 
+> OS: Operating System Type
+> Version: OS Version
+> Architexture: Supported Architextures by the OS
+> Python: The Python Version it was tested on
+> Status: ✅ Confirmed working — ⚠️ Implemented but not tested - ❌ Not Implemented
+> Release: The Release it was tested on
 
 ---
 
@@ -62,12 +68,7 @@ The launcher menu options are:
 
 ## Dependencies
 
-Option `4` installs or repairs dependencies based on your operating system.
-
-It also downloads AniWatch components automatically:
-
-- AniWatch API source from `https://github.com/ghoshRitesh12/aniwatch-api`
-- AniWatch downloader runtime files from `https://github.com/VeridonNetzwerk/assets/tree/main/Aniworld%20Downloader/downloaders/aniwatch`
+Option `4` installs or repairs dependencies based on your operating system and what's already installed.
 
 | Component | Version | Purpose | Auto-installed |
 |-----------|---------|---------|----------------|

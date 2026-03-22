@@ -18,6 +18,7 @@ aniwatch-api/dist/
 # Environment / secrets
 .env
 .env.*
+.gitignore
 aniwatch-api/.env
 aniwatch-api/.env.*
 

@@ -1013,10 +1013,44 @@ def install_repair() -> None:
         render_progress(97, 'Check final runtime configuration')
         ensure_runtime_shell_dependencies()
 
+        # --- Erweiterung: Node.js-Version und API-Start testen ---
+        try:
+            # Node.js Version prüfen
+            node_version = get_node_version()
+            if node_version is not None:
+                major, minor, patch = node_version
+                if major < 20:
+                    raise RuntimeError(f'Node.js v{major}.{minor}.{patch} ist zu alt. AniWatch API benötigt Node.js 20+. Bitte aktualisiere Node.js und führe Option 4 erneut aus.')
+        except Exception as exc:
+            log('ERROR', 'Installer thread', f'Node.js-Versionsprüfung fehlgeschlagen: {exc}')
+            print(f'[error] Node.js-Versionsprüfung fehlgeschlagen: {exc}')
+            raise
+
+        # Test: API-Build und Startfähigkeit prüfen
+        try:
+            ensure_api_runtime_artifacts()
+        except Exception as exc:
+            log('ERROR', 'Installer thread', f'AniWatch API Build/Prüfung fehlgeschlagen: {exc}')
+            print(f'[error] AniWatch API Build/Prüfung fehlgeschlagen: {exc}')
+            raise
+
         render_progress(100, 'Done')
         log('INFO', 'Installer thread', 'Install/repair completed successfully')
     finally:
         INSTALL_UI_ENABLED = False
+def get_node_version():
+    """Liest die installierte Node.js-Version als (major, minor, patch) Tuple aus."""
+    try:
+        result = subprocess.run([node_command(), '--version'], capture_output=True, text=True, timeout=10)
+        if result.returncode != 0:
+            return None
+        version_str = result.stdout.strip().lstrip('v')
+        parts = version_str.split('.')
+        if len(parts) >= 3:
+            return tuple(int(x) for x in parts[:3])
+        return None
+    except Exception:
+        return None
 
 
 def start_process(
