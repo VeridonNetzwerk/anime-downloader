@@ -14,25 +14,25 @@
 
 | OS          | Version           | Architecture      | Python       | Status           | Release      |
 | ----------- | ----------------- | ----------------- | ------------ | ---------------- | ------------ |
-| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13.x       | ✅ Working       | v1.3         |
-| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13.x       | ✅ Working       | v1.3         |
-| Windows     | 8.1               | x86 / x64         | ≤3.10        | ❌ Not Supported | -            |
-| Windows     | 8                 | x86 / x64         | ≤3.9         | ❌ Not Supported | -            |
+| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13         | ✅ Working       | v1.3         |
+| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13         | ✅ Working       | v1.3         |
+| Windows     | 8.1               | x86 / x64         | ≤3.10        | ⚠️ Untested      | -            |
+| Windows     | 8                 | x86 / x64         | ≤3.9         | ⚠️ Untested      | -            |
 | Windows     | 7 (SP1)           | x86 / x64         | ≤3.8         | ❌ Not Supported | -            |
-| Windows     | XP (SP3)          | x86               | ≤3.4         | ❌ Not Working   | -            |
-| Ubuntu      | 22.04 LTS         | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
-| Ubuntu      | 24.04 LTS         | x64 / ARM64       | 3.12+        | ⚠️ Untested      | -            |
-| Debian      | 11 (Bullseye)     | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
-| Debian      | 12 (Bookworm)     | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
-| Debian      | 13 (Trixie)       | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
-| Fedora      | 39+               | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
+| Windows     | XP (SP3)          | x86               | ≤3.4         | ❌ Not Supported | -            |
+| Ubuntu      | 22.04 LTS         | x64 / ARM64       | 3.10.12      | ✅ Working       | -            |
+| Ubuntu      | 24.04 LTS         | x64 / ARM64       | 3.12.2       | ✅ Working       | -            |
+| Debian      | 11 (Bullseye)     | x64 / ARM64       | 3.9.2        | ✅ Working       | -            |
+| Debian      | 12 (Bookworm)     | x64 / ARM64       | 3.11.2       | ✅ Working       | -            |
+| Debian      | 13 (Trixie)       | x64 / ARM64       | 3.12.3       | ✅ Working       | -            |
+| Fedora      | 39+               | x64 / ARM64       | 3.12.0       | ✅ Working       | -            |
 | Arch Linux  | 2025.01.01+       | x64               | 3.12+        | ⚠️ Untested      | -            |
-| Linux Mint  | 21.x              | x64               | 3.10+        | ⚠️ Untested      | -            |
+| Linux Mint  | 22                | x64               | 3.12.3       | ✅ Working       | -            |
 | openSUSE    | Leap / Tumbleweed | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
 | macOS       | 13 Ventura        | x64 / ARM64       | 3.10+        | ⚠️ Untested      | -            |
 | macOS       | 14 Sonoma         | x64 / ARM64       | 3.11+        | ⚠️ Untested      | -            |
-| ChromeOS    | ChromeOS          | x86 / x64 / ARM   | ?            | ❌ Not Working   | -            |
-| FydeOS      | Latest            | x86 / x64 / ARM   | ?            | ❌ Not Working   | -            |
+| ChromeOS    | ChromeOS          | x86 / x64 / ARM   | ?            | ❌ Not Supported | -            |
+| FydeOS      | Latest            | x86 / x64 / ARM   | ?            | ❌ Not Supported | -            |
 | ReactOS     | 0.4.15            | x86               | 3.4–3.8      | ❌ Not Supported | -            |
 | Haiku       | R1 Beta 4         | x64               | 3.10         | ❌ Not Supported | -            |
 | FreeBSD     | 13 / 14           | x64 / ARM64       | 3.9+         | ❌ Not Supported | -            |
@@ -102,40 +102,131 @@ Option `4` installs or repairs dependencies based on your operating system.
 ### Windows 10
 
 1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
-![Where to find releases](https://i.ibb.co/x8gq7N3R/grafik.png)
+![Where to find releases](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/1.png?raw=true)
 2. Download the Source code (zip) from the latest release.
-![Download Source code (zip)](https://i.ibb.co/QF9HDfd2/grafik.png)
+![Download Source code (zip)](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/2.png?raw=true)
 3. Extract the archive.
-![Extract All...](https://i.ibb.co/5hfCjVn4/3.png)
+![Extract All...](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/3.png?raw=true)
 4. Click Extract.
-![Click Extract](https://i.ibb.co/3mGN0Wcb/4.png)
+![Click Extract](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/4.png?raw=true)
 5. Open the Extracted Archive.
-![Open Folder](https://i.ibb.co/60zh5PRP/5.png)
+![Open Folder](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/5.png?raw=true)
 6. Click on the address bar at the top and copy the path.
-![Copy Path](https://i.ibb.co/9C36TRF/6.png)
+![Copy Path](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/6.png?raw=true)
 7. Press the Windows-Key or use the search bar, type Microsoft Store and open it.
-![Open MS Store](https://i.ibb.co/DfGRzYVD/7.png)
+![Open MS Store](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/7.png?raw=true)
 8. Search for Python 3.13 and click on it.
-![Search Python](https://i.ibb.co/2J6XnDv/8.png)
+![Search Python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/8.png?raw=true)
 9. Press Get in order to install Python 3.13.
-![Install Python](https://i.ibb.co/n8YtnHtY/9.png)
+![Install Python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/9.png?raw=true)
 10. After installing Python, press the Windows key or use the search bar, type cmd, and open it.
-![Open cmd](https://i.ibb.co/JR67vwj1/10.png)
-11. In the command prompt, type: cd (the path copied earlier)
-![cd into downloader](https://i.ibb.co/rKW8kjW9/11.png)
+![Open cmd](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/10.png?raw=true)
+11. In the command prompt, type: `cd <the path copied earlier>`
+![cd into downloader](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/11.png?raw=true)
 12. Run `py start-anime-downloader.py` or `python start-anime-downloader.py` (sometimes it's `py`, sometimes `python`, or sometimes both work).
-![py](https://i.ibb.co/GQY1hSCh/12.png)
-![python](https://i.ibb.co/8n6YMFdQ/12-2.png)
+![py](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/12.png?raw=true)
+![python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/12-2.png?raw=true)
 13. A menu should open. On the first run, select option 4 to install all dependencies.
-![Option 4](https://i.ibb.co/4ns8wGjD/13.png)
+![Option 4](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/13.png?raw=true)
 14. Once done, the downloader is successfully installed.
-![Done](https://i.ibb.co/5XgpGvBC/14.png)
+![Done](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/14.png?raw=true)
 
-> ⚠️ **Note:** If you run into an error, feel free to open an issue.
+> **Note:** If you run into an error, feel free to open an issue.
 
 ### Windows 11
 
-The setup on Windows 11 is identical to Windows 10. Follow the same steps as above.
+1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
+![Where to find releases](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/1.png?raw=true)
+2. Download the Source code (zip) from the latest release.
+![Download Source code (zip)](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/2.png?raw=true)
+3. Extract the archive.
+![Extract All...](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/3.png?raw=true)
+4. Click Extract.
+![Click Extract](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/4.png?raw=true)
+5. Open the Extracted Archive.
+![Open Folder](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/5.png?raw=true)
+6. Click on the address bar at the top and copy the path.
+![Copy Path](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/6.png?raw=true)
+7. Press the Windows-Key or use the search bar, type Microsoft Store and open it.
+![Open MS Store](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/7.png?raw=true)
+8. Search for Python 3.13 and click on it.
+![Search Python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/8.png?raw=true)
+9. Press Get in order to install Python 3.13.
+![Install Python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/9.png?raw=true)
+10. After installing Python, press the Windows key or use the search bar, type cmd, and open it.
+![Open cmd](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/10.png?raw=true)
+11. In the command prompt, type: `cd <the path copied earlier>`
+![cd into downloader](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/11.png?raw=true)
+12. Run `py start-anime-downloader.py` or `python start-anime-downloader.py` (sometimes it's `py`, sometimes `python`, or sometimes both work).
+![py](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/12.png?raw=true)
+![python](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/12.png?raw=true)
+13. A menu should open. On the first run, select option 4 to install all dependencies.
+![Option 4](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/13.png?raw=true)
+14. Once done, the downloader is successfully installed.
+![Done](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2011/14.png?raw=true)
+
+### Ubuntu 22
+
+1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
+![Where to find releases](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/1.png?raw=true)
+2. Download the Source code (zip) from the latest release.
+![Download Source code (zip)](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/2.png?raw=true)
+3. Extract the archive.
+![Extract archive](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/3.png?raw=true)
+4. Open a terminal in the extracted folder.
+![Open terminal](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/4.png?raw=true)
+5. Install Python and required base tools.
+![Install prerequisites](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/Screenshot%202026-03-21%20162854.png?raw=true)
+6. Start the launcher with `python3 start-anime-downloader.py`.
+![Start launcher](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/6.png?raw=true)
+7. Select option `4` (`Install/Repair`) on the first run.
+![Option 4](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/7.png?raw=true)
+8. Wait until install and repair are complete.
+![Install progress](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/8.png?raw=true)
+9. Start option `1`, `2`, or `3`.
+![Done](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2022/9.png?raw=true)
+
+### Ubuntu 24
+
+1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
+![Where to find releases](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/1.png?raw=true)
+2. Download the Source code (zip) from the latest release.
+![Download Source code (zip)](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/2.png?raw=true)
+3. Extract the archive.
+![Extract archive](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/3.png?raw=true)
+4. Open a terminal in the extracted folder.
+![Open terminal](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/4.png?raw=true)
+5. Install Python and required base tools.
+![Install prerequisites](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/5.png?raw=true)
+6. Start the launcher with `python3 start-anime-downloader.py`.
+![Start launcher](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/6.png?raw=true)
+7. Select option `4` (`Install/Repair`) on the first run.
+![Option 4](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/7.png?raw=true)
+8. Wait until install and repair are complete.
+![Install progress](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/8.png?raw=true)
+9. Start option `1`, `2`, or `3`.
+![Done](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Ubuntu%2024/9.png?raw=true)
+
+### Debian 11
+
+1. Navigate to [Releases](https://github.com/VeridonNetzwerk/anime-downloader/releases).
+![Where to find releases](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/1.png?raw=true)
+2. Download the Source code (zip) from the latest release.
+![Download Source code (zip)](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Windows%2010/2.png?raw=true)
+3. Extract the archive.
+![Extract archive](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/3.png?raw=true)
+4. Open a terminal in the extracted folder.
+![Open terminal](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/4.png?raw=true)
+5. Install Python and required base tools.
+![Install prerequisites](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/5.png?raw=true)
+6. Start the launcher with `python3 start-anime-downloader.py`.
+![Start launcher](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/6.png?raw=true)
+7. Select option `4` (`Install/Repair`) on the first run.
+![Option 4](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/7.png?raw=true)
+8. Wait until install and repair are complete.
+![Install progress](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/8.png?raw=true)
+9. Start option `1`, `2`, or `3`.
+![Done](https://github.com/VeridonNetzwerk/assets/blob/main/Aniworld%20Downloader/wiki/Installation.md/Debian%2011/9.png?raw=true)
 
 ---
 
