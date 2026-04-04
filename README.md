@@ -77,7 +77,6 @@ This project builds on the work of:
 | Project | Author |
 |---------|--------|
 | [aniwatch-dl](https://github.com/ruxartic/aniwatch-dl) | ruxartic |
-| [aniwatch-api](https://github.com/ghoshRitesh12/aniwatch-api) | ghoshRitesh12 |
 | [nodejs/installer](https://github.com/nodejs/installer) | Node.js team |
 | [AniWorld-Downloader](https://github.com/phoenixthrush/AniWorld-Downloader) | phoenixthrush |
 
