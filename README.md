@@ -47,16 +47,15 @@
 
 ## 🚀 Quick Start
 
-1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (Source Code (zip))
-2. Extract it...
-3. Start the launcher:
+1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (start-anime-downloader.zip)
+2. Start the Programm:
 
 ```bash
 python start-anime-downloader.py
 ```
 
-4. On first run, select **`4` → Install / Repair**. The script detects your OS and runs the matching setup flow automatically.
-5. Once done, pick your mode:
+3. On first run, select **`4` → Install / Repair**. The script detects your OS and runs the matching setup flow automatically.
+4. Once done, pick your mode:
 
 | Option | Action | URL |
 |--------|--------|-----|
