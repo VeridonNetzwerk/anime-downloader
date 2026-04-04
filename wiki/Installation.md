@@ -14,8 +14,8 @@
 
 | OS          | Version           | Architecture      | Python       | Status           | Release      |
 | ----------- | ----------------- | ----------------- | ------------ | ---------------- | ------------ |
-| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13         | ✅ Working       | v1.3.0       |
-| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13         | ✅ Working       | v1.3.0       |
+| Windows     | 11 (24H2)         | x64 / ARM64       | 3.13         | ✅ Working       | v1.3.2       |
+| Windows     | 10 (22H2)         | x86 / x64 / ARM64 | 3.13         | ✅ Working       | v1.3.2       |
 | Windows     | 8.1               | x86 / x64         | ≤3.10        | ⚠️ Untested      | -            |
 | Windows     | 8                 | x86 / x64         | ≤3.9         | ⚠️ Untested      | -            |
 | Windows     | 7 (SP1)           | x86 / x64         | ≤3.8         | ❌ Not Supported | -            |
