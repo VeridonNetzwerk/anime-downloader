@@ -220,30 +220,36 @@ def install_aniwatch_api_sources() -> None:
         log('INFO', thread, f'AniWatch API source already exists at {API_DIR}')
         return
 
-    if API_DIR.exists() and not (API_DIR / '.git').exists():
+    if API_DIR.exists():
         shutil.rmtree(API_DIR, ignore_errors=True)
 
-    if command_exists('git'):
-        if API_DIR.exists() and (API_DIR / '.git').exists():
-            run_command(['git', '-C', str(API_DIR), 'fetch', '--depth', '1', 'origin', 'main'], timeout=900, thread=thread, check=False)
-            run_command(['git', '-C', str(API_DIR), 'reset', '--hard', 'origin/main'], timeout=900, thread=thread, check=False)
-        else:
-            run_command(['git', 'clone', '--depth', '1', '--branch', 'main', ANIWATCH_API_REPO, str(API_DIR)], timeout=1800, thread=thread)
-        return
-
-    archive = ROOT_DIR / 'aniwatch-api-main.zip'
-    extract_root = ROOT_DIR / '_tmp_aniwatch_api'
-    download_file('https://codeload.github.com/ghoshRitesh12/aniwatch-api/zip/refs/heads/main', archive, thread=thread, timeout=180)
+    # Download des v1.3.0 Source-Code-Archivs, aniwatch-api daraus extrahieren, Rest löschen
+    archive = ROOT_DIR / '_v1.3.0-source.zip'
+    extract_root = ROOT_DIR / '_tmp_v130_src'
+    download_file(
+        'https://github.com/VeridonNetzwerk/anime-downloader/archive/refs/tags/v1.3.0.zip',
+        archive,
+        thread=thread,
+        timeout=300,
+    )
     shutil.rmtree(extract_root, ignore_errors=True)
     extract_root.mkdir(parents=True, exist_ok=True)
     shutil.unpack_archive(str(archive), str(extract_root))
     archive.unlink(missing_ok=True)
-    extracted = extract_root / 'aniwatch-api-main'
-    if not extracted.exists():
-        raise RuntimeError('Could not extract AniWatch API source archive.')
+    # GitHub benennt das Archiv-Root-Verzeichnis nach Repo-Name und Tag
+    inner_roots = list(extract_root.iterdir())
+    if not inner_roots:
+        shutil.rmtree(extract_root, ignore_errors=True)
+        raise RuntimeError('v1.3.0 source archive is empty.')
+    inner_root = inner_roots[0]
+    extracted_api = inner_root / 'aniwatch-api'
+    if not extracted_api.exists():
+        shutil.rmtree(extract_root, ignore_errors=True)
+        raise RuntimeError('aniwatch-api folder not found inside v1.3.0 source archive.')
     if API_DIR.exists():
         shutil.rmtree(API_DIR, ignore_errors=True)
-    shutil.move(str(extracted), str(API_DIR))
+    shutil.move(str(extracted_api), str(API_DIR))
+    # Rest des Source-Archivs löschen
     shutil.rmtree(extract_root, ignore_errors=True)
 
 
