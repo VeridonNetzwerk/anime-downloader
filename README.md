@@ -47,7 +47,7 @@
 
 ## 🚀 Quick Start
 
-1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (start-anime-downloader.zip)
+1. Download the **[latest Release](https://github.com/VeridonNetzwerk/anime-downloader/releases)** (start-anime-downloader.py)
 2. Start the Programm:
 
 ```bash
